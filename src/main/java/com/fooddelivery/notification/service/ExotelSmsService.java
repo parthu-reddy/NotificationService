@@ -62,10 +62,12 @@ public class ExotelSmsService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
             JsonNode rootNode = objectMapper.readTree(response.body());
             // A 200 OK means the message is 'queued', not delivered. The Sid is used for tracking.
             return rootNode.path("SMSMessage").path("Sid").asText(); 
+        } else if (response.statusCode() >= 400 && response.statusCode() < 500) {
+            throw new IllegalArgumentException("Exotel SMS Client Error (4xx). HTTP " + response.statusCode() + " Response: " + response.body());
         } else {
             throw new RuntimeException("Exotel SMS Failed. HTTP " + response.statusCode() + " Response: " + response.body());
         }

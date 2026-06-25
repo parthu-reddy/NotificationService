@@ -29,6 +29,10 @@ public class NotificationRouterService {
     private final ExotelSmsService exotelSmsService;
     private final GupshupWhatsAppService gupshupWhatsAppService;
     private final AwsSesEmailService awsSesEmailService;
+    private final BrevoEmailService brevoEmailService;
+
+    @org.springframework.beans.factory.annotation.Value("${platform.providers.email.active:aws}")
+    private String activeEmailProvider;
 
     public NotificationRouterService(RateLimitingService rateLimitingService,
                                      NotificationTemplateRepository templateRepository,
@@ -38,7 +42,8 @@ public class NotificationRouterService {
                                      FcmService fcmService,
                                      ExotelSmsService exotelSmsService,
                                      GupshupWhatsAppService gupshupWhatsAppService,
-                                     AwsSesEmailService awsSesEmailService) {
+                                     AwsSesEmailService awsSesEmailService,
+                                     BrevoEmailService brevoEmailService) {
         this.rateLimitingService = rateLimitingService;
         this.templateRepository = templateRepository;
         this.userPreferenceRepository = userPreferenceRepository;
@@ -48,10 +53,19 @@ public class NotificationRouterService {
         this.exotelSmsService = exotelSmsService;
         this.gupshupWhatsAppService = gupshupWhatsAppService;
         this.awsSesEmailService = awsSesEmailService;
+        this.brevoEmailService = brevoEmailService;
     }
 
     @Transactional
     public void routeAndDispatch(NotificationRequestEvent event) {
+        if (event == null || event.getUserId() == null || event.getEventName() == null || event.getChannel() == null) {
+            throw new IllegalArgumentException("Invalid event payload: userId, eventName, and channel are required.");
+        }
+
+        if (event.getChannel() != ChannelType.PUSH && (event.getExplicitRecipient() == null || event.getExplicitRecipient().isBlank())) {
+            throw new IllegalArgumentException("Recipient address is missing for channel " + event.getChannel());
+        }
+
         // Enforce rate limiting
         rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName());
 
@@ -147,7 +161,11 @@ public class NotificationRouterService {
 
     private String handleEmail(NotificationRequestEvent event, NotificationTemplate template) throws Exception {
         String content = hydrateTemplate(template.getContent(), event.getTemplateParams());
-        return awsSesEmailService.sendHtmlEmail("noreply@fooddelivery.com", event.getExplicitRecipient(), "Food Delivery Update", content);
+        if ("brevo".equalsIgnoreCase(activeEmailProvider)) {
+            return brevoEmailService.sendHtmlEmail("noreply@fooddelivery.com", event.getExplicitRecipient(), "Food Delivery Update", content);
+        } else {
+            return awsSesEmailService.sendHtmlEmail("noreply@fooddelivery.com", event.getExplicitRecipient(), "Food Delivery Update", content);
+        }
     }
 
     private String hydrateTemplate(String template, List<String> params) {

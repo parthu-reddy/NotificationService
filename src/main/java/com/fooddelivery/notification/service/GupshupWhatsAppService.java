@@ -53,6 +53,8 @@ public class GupshupWhatsAppService {
             JsonNode rootNode = objectMapper.readTree(response.body());
             // Successful API requests process asynchronously and return status 'submitted'
             return rootNode.path("messageId").asText();
+        } else if (response.statusCode() >= 400 && response.statusCode() < 500) {
+            throw new IllegalArgumentException("Gupshup Client Error (4xx). HTTP " + response.statusCode() + " Response: " + response.body());
         } else {
             throw new RuntimeException("Gupshup Dispatch Failed: " + response.body());
         }

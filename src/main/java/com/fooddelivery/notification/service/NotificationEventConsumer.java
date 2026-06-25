@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.annotation.BackOff;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.retrytopic.DltStrategy;
+import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
@@ -46,17 +49,21 @@ public class NotificationEventConsumer {
         routerService.routeAndDispatch(event);
     }
 
-    @KafkaListener(topics = "platform.notifications.dispatch.DLT", groupId = "notification-service-group")
-    public void processDeadLetterTopic(@Payload NotificationRequestEvent failedEvent) {
-        log.error("Terminal failure for event {}. Moving to manual intervention queue.", failedEvent.getEventId());
-        
-        // Persist final failure state to the notification_audit_logs table to mark as FAILED
+    @DltHandler
+    public void processDeadLetterTopic(@Payload(required = false) NotificationRequestEvent failedEvent, @org.springframework.messaging.handler.annotation.Header(name = org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE, required = false) String exceptionMessage) {
+        if (failedEvent == null) {
+            log.error("Received bad payload in DLT. Exception: {}", exceptionMessage);
+            return;
+        }
+
+        log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", failedEvent.getEventId(), exceptionMessage);
+
         NotificationAuditLog auditLog = new NotificationAuditLog();
         auditLog.setUserId(failedEvent.getUserId());
         auditLog.setChannel(failedEvent.getChannel());
-        auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null ? failedEvent.getExplicitRecipient() : "unknown");
+        auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
         auditLog.setStatus(DeliveryStatus.FAILED);
-        auditLog.setErrorReason("Max retries exceeded");
+        auditLog.setErrorReason("Max retries exceeded: " + exceptionMessage);
         auditLogRepository.save(auditLog);
     }
 }

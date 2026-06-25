@@ -8,7 +8,7 @@ description: Deep context on the Centralized Notification Service architecture, 
 You are working on the Centralized Notification Service, built with Spring Boot 3.x and Java 21.
 
 ## Architecture
-- **Event-Driven**: The service is a Kafka consumer. It listens to the `notification-events` topic.
+- **Event-Driven**: The service is a Kafka consumer. It listens to the `platform.notifications.dispatch` topic.
 - **Data Store**: PostgreSQL is used to store `UserDevice` (FCM tokens, phone numbers), `NotificationTemplate` (message templates), `UserPreference` (opt-outs), and `NotificationAuditLog`.
 - **Cache / Rate Limiting**: Redis is used via Bucket4j to rate limit notifications globally.
 ## Core Functionality & Event Flow

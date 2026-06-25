@@ -9,21 +9,21 @@ The Centralized Notification Service handles all outbound communication (Push, S
 
 ## How to Send a Notification
 
-1. **Kafka Topic**: `notification-events`
+1. **Kafka Topic**: `platform.notifications.dispatch`
 2. **Message Schema**: The payload should be serialized as JSON representing the `NotificationRequestEvent` object.
 
 ### JSON Schema for `NotificationRequestEvent`
 ```json
 {
   "eventId": "uuid-string-for-idempotency",
-  "userId": "string-user-id",
-  "templateCode": "string-template-identifier",
+  "userId": "uuid-string-user-id",
+  "eventName": "string-template-identifier",
   "channel": "PUSH | SMS | WHATSAPP | EMAIL",
   "explicitRecipient": "optional-string-override-address",
-  "templateParams": {
-    "key1": "value1",
-    "name": "John"
-  },
+  "templateParams": [
+    "value1",
+    "John"
+  ],
   "payload": {
     "action_url": "https://example.com"
   }
@@ -32,11 +32,11 @@ The Centralized Notification Service handles all outbound communication (Push, S
 
 ### Field Definitions
 - **eventId**: A unique identifier for the request, used for deduplication and tracing.
-- **userId**: The internal ID of the user. The service will look up their devices/contact info in the database.
-- **templateCode**: The code of the `NotificationTemplate` to use (e.g., `ORDER_SHIPPED`).
+- **userId**: The internal UUID of the user. The service will look up their devices/contact info in the database.
+- **eventName**: The code of the `NotificationTemplate` to use (e.g., `ORDER_SHIPPED`).
 - **channel**: Must be one of the supported `ChannelType` values (`PUSH`, `SMS`, `WHATSAPP`, `EMAIL`).
 - **explicitRecipient**: (Optional) Provide a direct email, phone number, or FCM token to override the user's saved contact info.
-- **templateParams**: (Optional) Key-value map of dynamic variables to inject into the template.
+- **templateParams**: (Optional) List of dynamic strings to inject into the template (using `{1}`, `{2}` format).
 - **payload**: (Optional) Key-value map of extra data payload (mostly used for PUSH data payloads).
 
 ## Best Practices

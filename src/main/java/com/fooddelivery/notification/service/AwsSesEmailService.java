@@ -6,8 +6,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
 import software.amazon.awssdk.services.sesv2.model.*;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 @Service
 public class AwsSesEmailService {
@@ -59,6 +59,9 @@ public class AwsSesEmailService {
             SendEmailResponse response = sesV2Client.sendEmail(emailRequestBuilder.build());
             return response.messageId();
         } catch (SesV2Exception e) {
+            if (e.statusCode() >= 400 && e.statusCode() < 500) {
+                throw new IllegalArgumentException("AWS SES Client Error (4xx): " + e.awsErrorDetails().errorMessage());
+            }
             throw new RuntimeException("AWS SES exception: " + e.awsErrorDetails().errorMessage());
         }
     }

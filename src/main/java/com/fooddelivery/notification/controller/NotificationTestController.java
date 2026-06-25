@@ -1,0 +1,30 @@
+package com.fooddelivery.notification.controller;
+
+import com.fooddelivery.notification.dto.NotificationRequestEvent;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/test/notifications")
+public class NotificationTestController {
+
+    private final KafkaTemplate<String, NotificationRequestEvent> kafkaTemplate;
+
+    public NotificationTestController(KafkaTemplate<String, NotificationRequestEvent> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    @PostMapping
+    public ResponseEntity<String> sendTestNotification(@RequestBody NotificationRequestEvent event) {
+        if (event.getEventId() == null) {
+            event.setEventId(UUID.randomUUID().toString());
+        }
+        
+        kafkaTemplate.send("platform.notifications.dispatch", event.getUserId().toString(), event);
+        
+        return ResponseEntity.ok("Event published successfully to platform.notifications.dispatch with ID: " + event.getEventId());
+    }
+}
