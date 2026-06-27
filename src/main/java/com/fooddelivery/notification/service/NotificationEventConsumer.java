@@ -3,9 +3,7 @@ package com.fooddelivery.notification.service;
 import com.fooddelivery.notification.domain.DeliveryStatus;
 import com.fooddelivery.notification.domain.NotificationAuditLog;
 import com.fooddelivery.notification.dto.NotificationRequestEvent;
-import com.fooddelivery.notification.exception.InvalidTemplateException;
-import com.fooddelivery.notification.exception.RateLimitExceededException;
-import com.fooddelivery.notification.exception.UserOptedOutException;
+import com.fooddelivery.notification.exception.TerminalNotificationException;
 import com.fooddelivery.notification.repository.NotificationAuditLogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -35,10 +33,7 @@ public class NotificationEventConsumer {
             backOff = @BackOff(delay = 2000, multiplier = 2.0, maxDelay = 10000), // 2s, 4s, 8s backoff
             autoCreateTopics = "true",
             exclude = {
-                    IllegalArgumentException.class,
-                    UserOptedOutException.class,
-                    InvalidTemplateException.class,
-                    RateLimitExceededException.class
+                    TerminalNotificationException.class
             }
     )
     @KafkaListener(topics = "platform.notifications.dispatch", groupId = "notification-service-group")
@@ -59,11 +54,12 @@ public class NotificationEventConsumer {
         log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", failedEvent.getEventId(), exceptionMessage);
 
         NotificationAuditLog auditLog = new NotificationAuditLog();
-        auditLog.setUserId(failedEvent.getUserId());
-        auditLog.setChannel(failedEvent.getChannel());
+        // Provide fallbacks for malformed payloads to avoid DB constraint violations
+        auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : java.util.UUID.randomUUID());
+        auditLog.setChannel(failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.notification.domain.ChannelType.EMAIL);
         auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
         auditLog.setStatus(DeliveryStatus.FAILED);
-        auditLog.setErrorReason("Max retries exceeded: " + exceptionMessage);
+        auditLog.setErrorReason("DLT Intervention: " + exceptionMessage);
         auditLogRepository.save(auditLog);
     }
 }

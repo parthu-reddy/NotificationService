@@ -6,12 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('btn-submit');
     const toastContainer = document.getElementById('toast-container');
 
+    function generateUUID() {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     // Auto-generate UUID on load
-    userIdInput.value = crypto.randomUUID();
+    userIdInput.value = generateUUID();
 
     // Generate UUID on button click
     generateBtn.addEventListener('click', () => {
-        userIdInput.value = crypto.randomUUID();
+        userIdInput.value = generateUUID();
         // Add a tiny micro-animation to the button
         generateBtn.style.transform = 'scale(0.9)';
         setTimeout(() => generateBtn.style.transform = 'scale(1)', 100);

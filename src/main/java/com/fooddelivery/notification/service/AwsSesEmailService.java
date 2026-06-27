@@ -59,8 +59,12 @@ public class AwsSesEmailService {
             SendEmailResponse response = sesV2Client.sendEmail(emailRequestBuilder.build());
             return response.messageId();
         } catch (SesV2Exception e) {
-            if (e.statusCode() >= 400 && e.statusCode() < 500) {
-                throw new IllegalArgumentException("AWS SES Client Error (4xx): " + e.awsErrorDetails().errorMessage());
+            if (e.statusCode() == 400 || e.statusCode() == 404) {
+                throw new com.fooddelivery.notification.exception.RecipientUnreachableException("AWS SES Client Error (400/404): " + e.awsErrorDetails().errorMessage());
+            } else if (e.statusCode() >= 400 && e.statusCode() < 500) {
+                throw new com.fooddelivery.notification.exception.InvalidPayloadException("AWS SES Client Error (4xx): " + e.awsErrorDetails().errorMessage());
+            } else if (e.statusCode() == 504 || e.statusCode() == 503) {
+                throw new com.fooddelivery.notification.exception.ProviderGatewayTimeoutException("AWS SES Gateway Timeout: " + e.awsErrorDetails().errorMessage());
             }
             throw new RuntimeException("AWS SES exception: " + e.awsErrorDetails().errorMessage());
         }
