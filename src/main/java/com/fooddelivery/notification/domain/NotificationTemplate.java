@@ -1,5 +1,7 @@
 package com.fooddelivery.notification.domain;
 
+import com.fooddelivery.common.enums.ChannelType;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

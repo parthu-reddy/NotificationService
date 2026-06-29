@@ -1,7 +1,9 @@
 package com.fooddelivery.notification.service;
 
+import com.fooddelivery.common.enums.ChannelType;
+
 import com.fooddelivery.notification.domain.*;
-import com.fooddelivery.notification.dto.NotificationRequestEvent;
+import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.exception.InvalidTemplateException;
 import com.fooddelivery.notification.exception.UserOptedOutException;
 import com.fooddelivery.notification.repository.NotificationAuditLogRepository;

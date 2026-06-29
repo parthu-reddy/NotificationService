@@ -1,6 +1,6 @@
 package com.fooddelivery.notification.repository;
 
-import com.fooddelivery.notification.domain.ChannelType;
+import com.fooddelivery.common.enums.ChannelType;
 import com.fooddelivery.notification.domain.NotificationTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

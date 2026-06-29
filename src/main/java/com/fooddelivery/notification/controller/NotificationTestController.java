@@ -1,6 +1,6 @@
 package com.fooddelivery.notification.controller;
 
-import com.fooddelivery.notification.dto.NotificationRequestEvent;
+import com.fooddelivery.common.event.NotificationRequestEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;

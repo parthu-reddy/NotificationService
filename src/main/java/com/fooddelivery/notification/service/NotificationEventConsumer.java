@@ -2,7 +2,7 @@ package com.fooddelivery.notification.service;
 
 import com.fooddelivery.notification.domain.DeliveryStatus;
 import com.fooddelivery.notification.domain.NotificationAuditLog;
-import com.fooddelivery.notification.dto.NotificationRequestEvent;
+import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.exception.TerminalNotificationException;
 import com.fooddelivery.notification.repository.NotificationAuditLogRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class NotificationEventConsumer {
         NotificationAuditLog auditLog = new NotificationAuditLog();
         // Provide fallbacks for malformed payloads to avoid DB constraint violations
         auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : java.util.UUID.randomUUID());
-        auditLog.setChannel(failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.notification.domain.ChannelType.EMAIL);
+        auditLog.setChannel(failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.common.enums.ChannelType.EMAIL);
         auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
         auditLog.setStatus(DeliveryStatus.FAILED);
         auditLog.setErrorReason("DLT Intervention: " + exceptionMessage);

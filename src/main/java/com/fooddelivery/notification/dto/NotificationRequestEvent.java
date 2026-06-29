@@ -1,6 +1,6 @@
 package com.fooddelivery.notification.dto;
 
-import com.fooddelivery.notification.domain.ChannelType;
+import com.fooddelivery.common.enums.ChannelType;
 import lombok.Data;
 
 import java.util.List;
