@@ -71,7 +71,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName("ORDER_PLACED");
+        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_CREATED);
         event.setChannel(ChannelType.SMS);
         event.setExplicitRecipient("1234567890");
 
@@ -87,7 +87,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName("ORDER_PLACED");
+        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_CREATED);
         event.setChannel(ChannelType.SMS);
         event.setExplicitRecipient("1234567890");
 
@@ -97,14 +97,14 @@ public class NotificationRouterServiceTest {
 
         NotificationTemplate template = new NotificationTemplate();
         template.setContent("Your order is placed");
-        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("ORDER_PLACED", ChannelType.SMS))
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_CREATED, ChannelType.SMS))
                 .thenReturn(Optional.of(template));
 
         when(exotelSmsService.dispatchSms(anyString(), anyString(), anyString(), any(), any())).thenReturn("sms-id-123");
 
         assertDoesNotThrow(() -> notificationRouterService.routeAndDispatch(event));
         verify(auditLogRepository, times(1)).save(any());
-        verify(rateLimitingService, times(1)).enforceRateLimit(userId.toString(), "ORDER_PLACED");
+        verify(rateLimitingService, times(1)).enforceRateLimit(userId.toString(), com.fooddelivery.common.constants.EventType.ORDER_CREATED);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName("ORDER_DELIVERED");
+        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_DELIVERED);
         event.setChannel(ChannelType.EMAIL);
         event.setExplicitRecipient("user@example.com");
 
@@ -122,7 +122,7 @@ public class NotificationRouterServiceTest {
 
         NotificationTemplate template = new NotificationTemplate();
         template.setContent("Your order is delivered");
-        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("ORDER_DELIVERED", ChannelType.EMAIL))
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_DELIVERED, ChannelType.EMAIL))
                 .thenReturn(Optional.of(template));
 
         when(awsSesEmailService.sendHtmlEmail(anyString(), anyString(), anyString(), anyString())).thenReturn("email-id-123");

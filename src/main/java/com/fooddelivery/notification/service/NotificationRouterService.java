@@ -64,7 +64,6 @@ public class NotificationRouterService {
         this.twilioSmsService = twilioSmsService;
     }
 
-    @Transactional
     public void routeAndDispatch(NotificationRequestEvent event) {
         if (event == null || event.getUserId() == null || event.getEventName() == null || event.getChannel() == null) {
             throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: userId, eventName, and channel are required.");

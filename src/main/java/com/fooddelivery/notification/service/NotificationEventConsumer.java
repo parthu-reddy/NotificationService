@@ -36,7 +36,7 @@ public class NotificationEventConsumer {
                     TerminalNotificationException.class
             }
     )
-    @KafkaListener(topics = "platform.notifications.dispatch", groupId = "notification-service-group")
+    @KafkaListener(topics = com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, groupId = com.fooddelivery.common.constants.KafkaConstants.GROUP_NOTIFICATION_SERVICE)
     public void consumeNotificationEvent(@Payload NotificationRequestEvent event) {
         log.info("Received notification request for user {} on channel {}", event.getUserId(), event.getChannel());
         

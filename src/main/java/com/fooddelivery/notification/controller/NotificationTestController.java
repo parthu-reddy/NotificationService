@@ -23,8 +23,12 @@ public class NotificationTestController {
             event.setEventId(UUID.randomUUID().toString());
         }
         
-        kafkaTemplate.send("platform.notifications.dispatch", event.getUserId().toString(), event);
-        
-        return ResponseEntity.ok("Event published successfully to platform.notifications.dispatch with ID: " + event.getEventId());
+        try {
+            kafkaTemplate.send(com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, event.getUserId().toString(), event)
+                .get(3, java.util.concurrent.TimeUnit.SECONDS);
+            return ResponseEntity.ok("Event published successfully to platform.notifications.dispatch with ID: " + event.getEventId());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to publish event: " + e.getMessage());
+        }
     }
 }
