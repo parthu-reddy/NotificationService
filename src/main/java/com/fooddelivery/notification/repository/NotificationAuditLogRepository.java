@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface NotificationAuditLogRepository extends JpaRepository<NotificationAuditLog, UUID> {
     Optional<NotificationAuditLog> findByProviderMessageId(String providerMessageId);
+    boolean existsByEventId(String eventId);
 }

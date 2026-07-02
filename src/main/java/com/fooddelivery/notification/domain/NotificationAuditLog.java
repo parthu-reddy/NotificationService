@@ -21,6 +21,9 @@ public class NotificationAuditLog {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "event_id", unique = true)
+    private String eventId;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 

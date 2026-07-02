@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import com.fooddelivery.notification.service.strategy.NotificationChannelStrategy;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -52,12 +53,22 @@ public class NotificationRouterServiceTest {
     @Mock
     private TwilioSmsService twilioSmsService;
 
-    @InjectMocks
+    @Mock
+    private NotificationChannelStrategy smsStrategy;
+    @Mock
+    private NotificationChannelStrategy emailStrategy;
+
     private NotificationRouterService notificationRouterService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(notificationRouterService, "activeEmailProvider", "aws");
+        when(smsStrategy.getSupportedChannel()).thenReturn(ChannelType.SMS);
+        when(emailStrategy.getSupportedChannel()).thenReturn(ChannelType.EMAIL);
+        notificationRouterService = new NotificationRouterService(
+            rateLimitingService, templateRepository, userPreferenceRepository,
+            userDeviceRepository, auditLogRepository,
+            java.util.List.of(smsStrategy, emailStrategy)
+        );
     }
 
     @Test
@@ -100,7 +111,7 @@ public class NotificationRouterServiceTest {
         when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_CREATED, ChannelType.SMS))
                 .thenReturn(Optional.of(template));
 
-        when(exotelSmsService.dispatchSms(anyString(), anyString(), anyString(), any(), any())).thenReturn("sms-id-123");
+        when(smsStrategy.dispatch(any(), any())).thenReturn("sms-id-123");
 
         assertDoesNotThrow(() -> notificationRouterService.routeAndDispatch(event));
         verify(auditLogRepository, times(1)).save(any());
@@ -125,7 +136,7 @@ public class NotificationRouterServiceTest {
         when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_DELIVERED, ChannelType.EMAIL))
                 .thenReturn(Optional.of(template));
 
-        when(awsSesEmailService.sendHtmlEmail(anyString(), anyString(), anyString(), anyString())).thenReturn("email-id-123");
+        when(emailStrategy.dispatch(any(), any())).thenReturn("email-id-123");
 
         assertDoesNotThrow(() -> notificationRouterService.routeAndDispatch(event));
         verify(auditLogRepository, times(1)).save(any());
