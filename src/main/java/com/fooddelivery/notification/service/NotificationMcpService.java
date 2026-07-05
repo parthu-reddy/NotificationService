@@ -18,16 +18,14 @@ public class NotificationMcpService {
     private final NotificationRouterService notificationRouterService;
     private final NotificationTestController testController;
     private final ProviderWebhookController webhookController;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public NotificationMcpService(NotificationRouterService notificationRouterService,
                                   NotificationTestController testController,
-                                  ProviderWebhookController webhookController,
-                                  ObjectMapper objectMapper) {
+                                  ProviderWebhookController webhookController) {
         this.notificationRouterService = notificationRouterService;
         this.testController = testController;
         this.webhookController = webhookController;
-        this.objectMapper = objectMapper;
     }
 
     @Tool(description = "Route and dispatch a notification request to a specific user via a specified channel (e.g. SMS, EMAIL, PUSH, WHATSAPP)")

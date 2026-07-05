@@ -8,7 +8,7 @@ import com.fooddelivery.notification.repository.NotificationAuditLogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.annotation.BackOff;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.annotation.DltHandler;
@@ -30,7 +30,7 @@ public class NotificationEventConsumer {
 
     @RetryableTopic(
             attempts = "4", // Initial attempt + 3 retries
-            backOff = @BackOff(delay = 2000, multiplier = 2.0, maxDelay = 10000), // 2s, 4s, 8s backoff
+            backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), // 2s, 4s, 8s backoff
             autoCreateTopics = "true",
             exclude = {
                     TerminalNotificationException.class
