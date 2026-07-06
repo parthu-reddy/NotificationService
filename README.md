@@ -1,29 +1,13 @@
-# Communication Integration
+# NotificationService (CommunicationIntegration)
 
-The Communication Integration microservice acts as the central notification dispatcher for the Food Delivery platform. It abstracts away third-party communication providers (e.g., AWS SES, Brevo, Twilio, Exotel, Gupshup, Firebase).
+The NotificationService is responsible for dispatching multi-channel communications (Email, SMS, Push) based on Kafka events produced by other microservices.
 
-## Responsibilities
+## Setup & Build
+1. Build the service: `mvn clean install`
+2. Run the application: `mvn spring-boot:run`
+3. Port: `8085`
 
-1. **Event Consumption**: Listens to the `notification-events` Kafka topic for standard `NotificationRequestEvent` messages (defined in CommonLibrary).
-2. **Strategy Routing**: Dynamically routes the notification payload to the appropriate channel (SMS, EMAIL, PUSH, WHATSAPP, VOICE) using the Strategy Pattern.
-3. **Auditing**: Logs all outgoing notifications to the `notification_db` for tracking and compliance.
-
-## Notification Flow
-
-```mermaid
-sequenceDiagram
-    participant K as Kafka (notification-events)
-    participant Consumer as NotificationEventConsumer
-    participant Router as NotificationRouterService
-    participant Provider as External API (Twilio/SES)
-    participant DB as Notification DB
-
-    K->>Consumer: Consume NotificationRequestEvent
-    Consumer->>Router: Route Request
-    Router->>Provider: Send message via respective Client
-    Router->>DB: Save NotificationAuditLog (Status: SENT)
-```
-
-## Setup
-
-Requires PostgreSQL (`notification_db`) and Kafka. Run `mvn spring-boot:run`.
+## Key Responsibilities
+- **Event Consumption**: Listens to Kafka topics (e.g., `notification-events`) for generic notification requests.
+- **Provider Strategy**: Dynamically selects the appropriate communication provider (e.g., SendGrid for email, Twilio for SMS) based on the channel specified.
+- **Security**: Ensures any internal API exposed is guarded by the `PreAuthFilter`.
