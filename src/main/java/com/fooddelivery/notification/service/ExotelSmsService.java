@@ -32,6 +32,9 @@ public class ExotelSmsService {
     
     @Value("${platform.webhook.base-url}")
     private String webhookBaseUrl;
+    
+    @Value("${platform.webhook.secret}")
+    private String webhookSecret;
 
     private final HttpClient httpClient = HttpClient.newBuilder().build();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -46,7 +49,7 @@ public class ExotelSmsService {
                 "Body", content,
                 "DltEntityId", dltEntityId,
                 "DltTemplateId", dltTemplateId,
-                "StatusCallback", webhookBaseUrl + "/webhooks/providers/exotel/status" // Instructs Exotel to POST back delivery updates
+                "StatusCallback", webhookBaseUrl + "/webhooks/providers/exotel/status?token=" + webhookSecret // Instructs Exotel to POST back delivery updates
         );
 
         String formBody = formData.entrySet().stream()

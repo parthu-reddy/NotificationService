@@ -18,6 +18,9 @@ public class NotificationMcpService {
     private final NotificationRouterService notificationRouterService;
     private final ProviderWebhookController webhookController;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    @org.springframework.beans.factory.annotation.Value("${platform.webhook.secret}")
+    private String webhookSecret;
 
     public NotificationMcpService(NotificationRouterService notificationRouterService,
                                   ProviderWebhookController webhookController) {
@@ -49,7 +52,7 @@ public class NotificationMcpService {
             Map<String, String> payload = new HashMap<>();
             payload.put("SmsSid", smsSid);
             payload.put("Status", status);
-            return objectMapper.writeValueAsString(webhookController.handleExotelCallback(payload).getStatusCode());
+            return objectMapper.writeValueAsString(webhookController.handleExotelCallback(payload, webhookSecret).getStatusCode());
         } catch (Exception e) {
             return "Failed to simulate webhook: " + e.getMessage();
         }
