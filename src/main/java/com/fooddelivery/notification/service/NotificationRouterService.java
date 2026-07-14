@@ -1,6 +1,7 @@
 package com.fooddelivery.notification.service;
 
 import com.fooddelivery.common.enums.ChannelType;
+import com.fooddelivery.common.service.RateLimitingService;
 
 import com.fooddelivery.notification.domain.*;
 import com.fooddelivery.common.event.NotificationRequestEvent;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
+@Service("communicationNotificationRouterService")
 public class NotificationRouterService {
 
     private final RateLimitingService rateLimitingService;

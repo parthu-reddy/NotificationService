@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import com.fooddelivery.notification.service.strategy.NotificationChannelStrategy;
+import com.fooddelivery.common.service.RateLimitingService;
 
 import java.util.Optional;
 import java.util.UUID;
