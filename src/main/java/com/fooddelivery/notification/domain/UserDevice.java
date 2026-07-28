@@ -15,6 +15,7 @@ public class UserDevice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     private UUID id;
 
     @Column(name = "user_id", nullable = false)

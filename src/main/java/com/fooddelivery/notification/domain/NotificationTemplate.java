@@ -18,6 +18,7 @@ public class NotificationTemplate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     private UUID id;
 
     @Column(name = "event_name", nullable = false, length = 100)
