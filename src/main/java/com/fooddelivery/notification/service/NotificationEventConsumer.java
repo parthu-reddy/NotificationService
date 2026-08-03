@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -55,7 +54,7 @@ public class NotificationEventConsumer {
 
         NotificationAuditLog auditLog = new NotificationAuditLog();
         // Provide fallbacks for malformed payloads to avoid DB constraint violations
-        auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : java.util.UUID.randomUUID());
+        auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : new java.util.UUID(0L, 0L));
         auditLog.setChannel(failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.common.enums.ChannelType.EMAIL);
         auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
         auditLog.setStatus(DeliveryStatus.FAILED);

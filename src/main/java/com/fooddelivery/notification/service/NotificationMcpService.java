@@ -17,15 +17,18 @@ public class NotificationMcpService {
 
     private final NotificationRouterService notificationRouterService;
     private final ProviderWebhookController webhookController;
+    private final com.fooddelivery.notification.controller.DeviceController deviceController;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     @org.springframework.beans.factory.annotation.Value("${platform.webhook.secret}")
     private String webhookSecret;
 
     public NotificationMcpService(NotificationRouterService notificationRouterService,
-                                  ProviderWebhookController webhookController) {
+                                  ProviderWebhookController webhookController,
+                                  com.fooddelivery.notification.controller.DeviceController deviceController) {
         this.notificationRouterService = notificationRouterService;
         this.webhookController = webhookController;
+        this.deviceController = deviceController;
     }
 
     @Tool(description = "Route and dispatch a notification request to a specific user via a specified channel (e.g. SMS, EMAIL, PUSH, WHATSAPP)")
@@ -55,6 +58,31 @@ public class NotificationMcpService {
             return objectMapper.writeValueAsString(webhookController.handleExotelCallback(payload, webhookSecret).getStatusCode());
         } catch (Exception e) {
             return "Failed to simulate webhook: " + e.getMessage();
+        }
+    }
+
+    private java.security.Principal createMockPrincipal(String userId) {
+        return () -> userId;
+    }
+
+    @Tool(description = "Register a device FCM token. Provide userId, fcmToken, and platform.")
+    public String registerDevice(String userId, String fcmToken, String platform) {
+        try {
+            com.fooddelivery.notification.controller.DeviceController.DeviceRegistrationRequest req = new com.fooddelivery.notification.controller.DeviceController.DeviceRegistrationRequest();
+            req.setFcmToken(fcmToken);
+            req.setPlatform(platform);
+            return objectMapper.writeValueAsString(deviceController.registerDevice(createMockPrincipal(userId), req).getBody());
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    @Tool(description = "Unregister a device FCM token. Provide userId and fcmToken.")
+    public String unregisterDevice(String userId, String fcmToken) {
+        try {
+            return objectMapper.writeValueAsString(deviceController.unregisterDevice(createMockPrincipal(userId), fcmToken).getBody());
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
     }
 }

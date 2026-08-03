@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Map;
+import java.net.URLEncoder;
 
 @Service
 public class TwilioSmsService {
@@ -35,7 +36,9 @@ public class TwilioSmsService {
         String url = String.format("https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json", accountSid);
         String auth = "Basic " + Base64.getEncoder().encodeToString((accountSid + ":" + authToken).getBytes(StandardCharsets.UTF_8));
         
-        String formBody = "From=" + fromNumber + "&To=" + recipient + "&Body=" + content;
+        String formBody = "From=" + URLEncoder.encode(fromNumber, StandardCharsets.UTF_8) + 
+                          "&To=" + URLEncoder.encode(recipient, StandardCharsets.UTF_8) + 
+                          "&Body=" + URLEncoder.encode(content, StandardCharsets.UTF_8);
         
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -49,7 +52,8 @@ public class TwilioSmsService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                return "twilio-success-id"; // Mock ID 
+                com.fasterxml.jackson.databind.JsonNode rootNode = new ObjectMapper().readTree(response.body());
+                return rootNode.path("sid").asText();
             } else if (response.statusCode() == 400 || response.statusCode() == 404) {
                 throw new RecipientUnreachableException("Twilio: Recipient unreachable or invalid payload. HTTP " + response.statusCode());
             } else if (response.statusCode() == 429 || response.statusCode() == 503 || response.statusCode() == 504) {

@@ -17,6 +17,8 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
     private final BrevoEmailService brevoEmailService;
     private final String activeEmailProvider;
     private final java.util.concurrent.atomic.AtomicInteger consecutiveEmailTimeouts = new java.util.concurrent.atomic.AtomicInteger(0);
+    private volatile long lastFailoverTimestamp = 0;
+    private static final long FAILOVER_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
     public EmailNotificationStrategy(AwsSesEmailService awsSesEmailService,
                                      BrevoEmailService brevoEmailService,
@@ -36,7 +38,14 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
         String content = hydrateTemplate(template.getContent(), event.getTemplateParams());
         boolean useBrevo = "brevo".equalsIgnoreCase(activeEmailProvider);
         if (consecutiveEmailTimeouts.get() >= 3) {
-            useBrevo = !useBrevo; // Failover to the alternative
+            // Check if cooldown has passed before probing primary again
+            if (System.currentTimeMillis() - lastFailoverTimestamp < FAILOVER_COOLDOWN_MS) {
+                useBrevo = !useBrevo; // Stay on failover provider
+            } else {
+                // Cooldown expired — probe primary again
+                log.info("Email failover cooldown expired. Probing primary provider.");
+                consecutiveEmailTimeouts.set(0);
+            }
         }
         
         try {
@@ -53,6 +62,7 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
             log.warn("Email Gateway Timeout. Consecutive failures: {}", currentFailures);
             if (currentFailures >= 3) {
                 log.info("Failing over Email Provider");
+                lastFailoverTimestamp = System.currentTimeMillis();
                 if (useBrevo) {
                     return awsSesEmailService.sendHtmlEmail("noreply@fooddelivery.com", event.getExplicitRecipient(), "Food Delivery Update", content);
                 } else {

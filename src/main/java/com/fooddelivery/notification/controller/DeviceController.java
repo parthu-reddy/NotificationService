@@ -32,10 +32,10 @@ public class DeviceController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> registerDevice(
-            @RequestHeader("X-User-Id") String userIdHeader,
+            java.security.Principal principal,
             @Valid @RequestBody DeviceRegistrationRequest request) {
             
-        UUID userId = UUID.fromString(userIdHeader);
+        UUID userId = UUID.fromString(principal.getName());
         Optional<UserDevice> existing = userDeviceRepository.findByFcmToken(request.getFcmToken());
         
         if (existing.isPresent()) {
@@ -61,10 +61,10 @@ public class DeviceController {
     @DeleteMapping("/{fcmToken}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<Void>> unregisterDevice(
-            @RequestHeader("X-User-Id") String userIdHeader,
+            java.security.Principal principal,
             @PathVariable String fcmToken) {
             
-        UUID userId = UUID.fromString(userIdHeader);
+        UUID userId = UUID.fromString(principal.getName());
         Optional<UserDevice> existing = userDeviceRepository.findByFcmToken(fcmToken);
         
         if (existing.isPresent() && existing.get().getUserId().equals(userId)) {
