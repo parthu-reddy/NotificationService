@@ -13,10 +13,12 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/notifications/devices")
 @RequiredArgsConstructor
+@Slf4j
 public class DeviceController {
 
     private final UserDeviceRepository userDeviceRepository;

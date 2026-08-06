@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.UUID;
 import java.util.HashMap;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class NotificationMcpService {
 
     private final NotificationRouterService notificationRouterService;

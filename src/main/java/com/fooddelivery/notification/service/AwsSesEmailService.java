@@ -8,8 +8,10 @@ import software.amazon.awssdk.services.sesv2.model.*;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class AwsSesEmailService {
 
     private SesV2Client sesV2Client;
