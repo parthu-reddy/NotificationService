@@ -3,14 +3,13 @@ package com.fooddelivery.notification.service;
 import com.fooddelivery.notification.domain.DeliveryStatus;
 import com.fooddelivery.notification.domain.NotificationAuditLog;
 import com.fooddelivery.notification.repository.NotificationAuditLogRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 public class AuditLogService {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuditLogService.class);
     private final NotificationAuditLogRepository auditLogRepository;
 
     public AuditLogService(NotificationAuditLogRepository auditLogRepository) {

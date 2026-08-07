@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -13,45 +12,27 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j
 public class GupshupWhatsAppService {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GupshupWhatsAppService.class);
     @Value("${gupshup.api.key}")
     private String apiKey;
-
     @Value("${gupshup.source.number}")
     private String sourceNumber;
-
     private final HttpClient httpClient = HttpClient.newBuilder().build();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String dispatchWhatsAppTemplate(String destination, String templateId, List<String> templateParams) throws Exception {
         String endpoint = "https://api.gupshup.io/wa/api/v1/template/msg";
-
         // Construct the strictly required template object
-        Map<String, Object> templateObj = Map.of(
-                "id", templateId,
-                "params", templateParams != null ? templateParams : List.of()
-        );
+        Map<String, Object> templateObj = Map.of("id", templateId, "params", templateParams != null ? templateParams : List.of());
         String templateJson = objectMapper.writeValueAsString(templateObj);
-
-        String requestBody = "source=" + URLEncoder.encode(sourceNumber, StandardCharsets.UTF_8) +
-                "&destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8) +
-                "&template=" + URLEncoder.encode(templateJson, StandardCharsets.UTF_8);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(endpoint))
-                .header("apikey", apiKey)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
+        String requestBody = "source=" + URLEncoder.encode(sourceNumber, StandardCharsets.UTF_8) + "&destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8) + "&template=" + URLEncoder.encode(templateJson, StandardCharsets.UTF_8);
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endpoint)).header("apikey", apiKey).header("Content-Type", "application/x-www-form-urlencoded").POST(HttpRequest.BodyPublishers.ofString(requestBody)).build();
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 JsonNode rootNode = objectMapper.readTree(response.body());
                 return rootNode.path("messageId").asText();

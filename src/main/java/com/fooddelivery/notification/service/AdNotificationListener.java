@@ -6,17 +6,16 @@ import com.fooddelivery.common.constants.EventType;
 import com.fooddelivery.common.constants.KafkaConstants;
 import com.fooddelivery.common.enums.ChannelType;
 import com.fooddelivery.common.event.NotificationRequestEvent;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import java.util.UUID;
 import java.util.Map;
 
-@Slf4j
 @Component
 public class AdNotificationListener {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdNotificationListener.class);
     private final NotificationEventConsumer notificationConsumer;
     private final ObjectMapper objectMapper;
 
@@ -39,33 +38,21 @@ public class AdNotificationListener {
             } catch (IllegalArgumentException e) {
                 return;
             }
-
             if (eventType == EventType.AD_BUDGET_ALERT || eventType == EventType.AD_CAMPAIGN_PAUSED) {
                 log.info("Processing Advertisement notification for event type: {}", eventType);
-                
                 String advertiserIdStr = payloadNode.path("advertiserId").asText(null);
                 if (advertiserIdStr == null && payloadNode.has("payload")) {
                     JsonNode nested = objectMapper.readTree(payloadNode.get("payload").asText());
                     advertiserIdStr = nested.path("advertiserId").asText(null);
                 }
-
                 if (advertiserIdStr == null || advertiserIdStr.isBlank()) {
                     log.warn("Cannot send ad notification: missing advertiserId");
                     return;
                 }
-
-                NotificationRequestEvent notification = NotificationRequestEvent.builder()
-                        .eventId(UUID.randomUUID().toString())
-                        .userId(UUID.fromString(advertiserIdStr))
-                        .channel(ChannelType.EMAIL)
-                        .eventName(eventType.name())
-                        .payload(Map.of("message", "Campaign event: " + eventType.name()))
-                        .build();
-
+                NotificationRequestEvent notification = NotificationRequestEvent.builder().eventId(UUID.randomUUID().toString()).userId(UUID.fromString(advertiserIdStr)).channel(ChannelType.EMAIL).eventName(eventType.name()).payload(Map.of("message", "Campaign event: " + eventType.name())).build();
                 // Dispatch to the internal notification pipeline
                 notificationConsumer.consumeNotificationEvent(notification);
             }
-
         } catch (Exception e) {
             log.error("Failed to process ad event for notifications", e);
         }

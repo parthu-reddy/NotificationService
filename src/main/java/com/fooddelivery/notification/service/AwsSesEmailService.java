@@ -5,26 +5,22 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sesv2.SesV2Client;
 import software.amazon.awssdk.services.sesv2.model.*;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j
 public class AwsSesEmailService {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AwsSesEmailService.class);
     private SesV2Client sesV2Client;
-
     @Value("${aws.ses.configuration-set-name:}")
     private String configurationSetName;
 
     @PostConstruct
     public void initializeClient() {
         // Initializes using the DefaultCredentialsProvider chain (e.g., IAM roles, Env Vars)
-        this.sesV2Client = SesV2Client.builder()
-                .region(Region.AP_SOUTH_1) // Region matching the core infrastructure
-                .build();
+        this.sesV2Client =  // Region matching the core infrastructure
+        SesV2Client.builder().region(Region.AP_SOUTH_1).build();
     }
 
     @PreDestroy
@@ -35,28 +31,13 @@ public class AwsSesEmailService {
     }
 
     public String sendHtmlEmail(String senderAddress, String recipientAddress, String subject, String htmlBody) {
-        Destination destination = Destination.builder()
-                .toAddresses(recipientAddress)
-                .build();
-
-        Message message = Message.builder()
-                .subject(Content.builder().data(subject).build())
-                .body(Body.builder().html(Content.builder().data(htmlBody).build()).build())
-                .build();
-
-        EmailContent emailContent = EmailContent.builder()
-                .simple(message)
-                .build();
-
-        SendEmailRequest.Builder emailRequestBuilder = SendEmailRequest.builder()
-                .fromEmailAddress(senderAddress)
-                .destination(destination)
-                .content(emailContent);
-                
+        Destination destination = Destination.builder().toAddresses(recipientAddress).build();
+        Message message = Message.builder().subject(Content.builder().data(subject).build()).body(Body.builder().html(Content.builder().data(htmlBody).build()).build()).build();
+        EmailContent emailContent = EmailContent.builder().simple(message).build();
+        SendEmailRequest.Builder emailRequestBuilder = SendEmailRequest.builder().fromEmailAddress(senderAddress).destination(destination).content(emailContent);
         if (configurationSetName != null && !configurationSetName.isEmpty()) {
             emailRequestBuilder.configurationSetName(configurationSetName); // Required for tracking bounces/complaints
         }
-
         try {
             SendEmailResponse response = sesV2Client.sendEmail(emailRequestBuilder.build());
             return response.messageId();

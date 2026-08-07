@@ -5,15 +5,12 @@ import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.domain.NotificationTemplate;
 import com.fooddelivery.notification.service.ExotelSmsService;
 import com.fooddelivery.notification.service.TwilioSmsService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class SmsNotificationStrategy implements NotificationChannelStrategy {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SmsNotificationStrategy.class);
     private final ExotelSmsService exotelSmsService;
     private final TwilioSmsService twilioSmsService;
     private final java.util.concurrent.atomic.AtomicInteger consecutiveSmsTimeouts = new java.util.concurrent.atomic.AtomicInteger(0);
@@ -51,5 +48,11 @@ public class SmsNotificationStrategy implements NotificationChannelStrategy {
             }
             throw e;
         }
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public SmsNotificationStrategy(final ExotelSmsService exotelSmsService, final TwilioSmsService twilioSmsService) {
+        this.exotelSmsService = exotelSmsService;
+        this.twilioSmsService = twilioSmsService;
     }
 }

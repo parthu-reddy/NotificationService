@@ -3,19 +3,15 @@ package com.fooddelivery.notification.config;
 import com.fooddelivery.common.enums.ChannelType;
 import com.fooddelivery.notification.domain.NotificationTemplate;
 import com.fooddelivery.notification.repository.NotificationTemplateRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class NotificationTemplateSeeder implements CommandLineRunner {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationTemplateSeeder.class);
     private final NotificationTemplateRepository repository;
 
     @Override
@@ -46,5 +42,10 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
             repository.save(template);
             log.info("Updated template content for event {} on channel {}", eventName, channel);
         }
+    }
+
+    @java.lang.SuppressWarnings("all")
+    public NotificationTemplateSeeder(final NotificationTemplateRepository repository) {
+        this.repository = repository;
     }
 }

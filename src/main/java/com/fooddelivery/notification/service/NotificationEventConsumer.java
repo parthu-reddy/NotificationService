@@ -5,7 +5,6 @@ import com.fooddelivery.notification.domain.NotificationAuditLog;
 import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.exception.TerminalNotificationException;
 import com.fooddelivery.notification.repository.NotificationAuditLogRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.retry.annotation.Backoff;
@@ -14,11 +13,10 @@ import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-
-@Slf4j
 @Component
 public class NotificationEventConsumer {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationEventConsumer.class);
     private final NotificationRouterService routerService;
     private final NotificationAuditLogRepository auditLogRepository;
 
@@ -27,18 +25,12 @@ public class NotificationEventConsumer {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @RetryableTopic(
-            attempts = "4", // Initial attempt + 3 retries
-            backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), // 2s, 4s, 8s backoff
-            autoCreateTopics = "true",
-            exclude = {
-                    TerminalNotificationException.class
-            }
-    )
+    // Initial attempt + 3 retries
+    // 2s, 4s, 8s backoff
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), autoCreateTopics = "true", exclude = {TerminalNotificationException.class})
     @KafkaListener(topics = com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, groupId = com.fooddelivery.common.constants.KafkaConstants.GROUP_NOTIFICATION_SERVICE)
     public void consumeNotificationEvent(@Payload NotificationRequestEvent event) {
         log.info("Received notification request for user {} on channel {}", event.getUserId(), event.getChannel());
-        
         // The router service is responsible for rate-limiting checks and provider delegation
         routerService.routeAndDispatch(event);
     }
@@ -49,9 +41,7 @@ public class NotificationEventConsumer {
             log.error("Received bad payload in DLT. Exception: {}", exceptionMessage);
             return;
         }
-
         log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", failedEvent.getEventId(), exceptionMessage);
-
         NotificationAuditLog auditLog = new NotificationAuditLog();
         // Provide fallbacks for malformed payloads to avoid DB constraint violations
         auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : new java.util.UUID(0L, 0L));

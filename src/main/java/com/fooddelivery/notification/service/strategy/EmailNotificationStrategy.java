@@ -5,14 +5,13 @@ import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.domain.NotificationTemplate;
 import com.fooddelivery.notification.service.AwsSesEmailService;
 import com.fooddelivery.notification.service.BrevoEmailService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 public class EmailNotificationStrategy implements NotificationChannelStrategy {
-
+    @java.lang.SuppressWarnings("all")
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EmailNotificationStrategy.class);
     private final AwsSesEmailService awsSesEmailService;
     private final BrevoEmailService brevoEmailService;
     private final String activeEmailProvider;
@@ -20,9 +19,7 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
     private volatile long lastFailoverTimestamp = 0;
     private static final long FAILOVER_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
-    public EmailNotificationStrategy(AwsSesEmailService awsSesEmailService,
-                                     BrevoEmailService brevoEmailService,
-                                     @Value("${platform.providers.email.active:aws}") String activeEmailProvider) {
+    public EmailNotificationStrategy(AwsSesEmailService awsSesEmailService, BrevoEmailService brevoEmailService, @Value("${platform.providers.email.active:aws}") String activeEmailProvider) {
         this.awsSesEmailService = awsSesEmailService;
         this.brevoEmailService = brevoEmailService;
         this.activeEmailProvider = activeEmailProvider;
@@ -47,7 +44,6 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
                 consecutiveEmailTimeouts.set(0);
             }
         }
-        
         try {
             String id;
             if (useBrevo) {
