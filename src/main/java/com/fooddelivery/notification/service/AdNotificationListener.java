@@ -7,6 +7,12 @@ import com.fooddelivery.common.constants.KafkaConstants;
 import com.fooddelivery.common.enums.ChannelType;
 import com.fooddelivery.common.event.NotificationRequestEvent;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.kafka.annotation.DltHandler;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import java.util.UUID;
@@ -24,6 +30,7 @@ public class AdNotificationListener {
         this.objectMapper = objectMapper;
     }
 
+    @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), autoCreateTopics = "true", dltStrategy = DltStrategy.FAIL_ON_ERROR)
     @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE)
     public void consumeAdEvent(@Payload String message) {
         try {
@@ -56,5 +63,10 @@ public class AdNotificationListener {
         } catch (Exception e) {
             log.error("Failed to process ad event for notifications", e);
         }
+    }
+
+    @DltHandler
+    public void handleDlt(Object message, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        System.err.println("Message failed 5 times and sent to DLT: " + topic + " - " + message);
     }
 }

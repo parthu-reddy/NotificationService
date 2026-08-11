@@ -23,6 +23,16 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         seedTemplate(com.fooddelivery.common.constants.NotificationTemplate.DRIVER_ON_THE_WAY.name(), ChannelType.PUSH, "Driver is on the way for order {1}.");
         seedTemplate(com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN.name(), ChannelType.SMS, "Your OTP is {1}. It is valid for 5 minutes.");
         seedTemplate(com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN.name(), ChannelType.EMAIL, "Your OTP is {1}. It is valid for 5 minutes.");
+        
+        // Cancellation and Refund templates
+        seedTemplate(com.fooddelivery.common.constants.EventType.ORDER_CANCELLED.name(), ChannelType.PUSH, "Your order {1} has been cancelled.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.ORDER_CANCELLED_BY_RESTAURANT.name(), ChannelType.PUSH, "We're sorry, your order {1} was cancelled by the restaurant.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.ORDER_CANCELLED_BY_ADMIN.name(), ChannelType.PUSH, "Your order {1} has been cancelled by our support team.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.PAYMENT_REFUND_REQUESTED.name(), ChannelType.PUSH, "A refund for order {1} has been initiated.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.PAYMENT_REFUNDED.name(), ChannelType.PUSH, "Your refund for order {1} has been successfully processed.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.ORDER_PARTIALLY_REFUNDED.name(), ChannelType.PUSH, "A partial refund has been issued for your order {1}.");
+        seedTemplate(com.fooddelivery.common.constants.EventType.PAYMENT_PARTIALLY_REFUNDED.name(), ChannelType.PUSH, "A partial refund for order {1} has been successfully processed.");
+        
         log.info("Finished seeding notification templates.");
     }
 
