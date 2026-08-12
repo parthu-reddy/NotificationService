@@ -45,15 +45,4 @@ CREATE TABLE user_preferences (
     whatsapp_enabled BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE outbox_events (
-    id UUID PRIMARY KEY,
-    aggregate_type VARCHAR(255) NOT NULL,
-    aggregate_id VARCHAR(255) NOT NULL,
-    type VARCHAR(255) NOT NULL,
-    payload JSONB NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE,
-    status VARCHAR(50) DEFAULT 'UNPROCESSED',
-    processed_at TIMESTAMP WITH TIME ZONE,
-    error_message TEXT,
-    retry_count INTEGER DEFAULT 0
-);
+
