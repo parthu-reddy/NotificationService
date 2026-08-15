@@ -12,9 +12,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
+@lombok.extern.slf4j.Slf4j
 public class FirebaseConfig {
-
-    private static final Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
 
     @PostConstruct
     public void initialize() {

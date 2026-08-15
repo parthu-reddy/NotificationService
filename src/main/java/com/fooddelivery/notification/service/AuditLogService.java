@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class AuditLogService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuditLogService.class);
+
     private final NotificationAuditLogRepository auditLogRepository;
 
     public AuditLogService(NotificationAuditLogRepository auditLogRepository) {

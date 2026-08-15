@@ -19,9 +19,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service("communicationNotificationRouterService")
+@lombok.extern.slf4j.Slf4j
 public class NotificationRouterService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationRouterService.class);
+
     private final RateLimitingService rateLimitingService;
     private final NotificationTemplateRepository templateRepository;
     private final UserPreferenceRepository userPreferenceRepository;

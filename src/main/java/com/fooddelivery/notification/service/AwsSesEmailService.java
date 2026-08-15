@@ -9,9 +9,10 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class AwsSesEmailService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AwsSesEmailService.class);
+
     private SesV2Client sesV2Client;
     @Value("${aws.ses.configuration-set-name:}")
     private String configurationSetName;

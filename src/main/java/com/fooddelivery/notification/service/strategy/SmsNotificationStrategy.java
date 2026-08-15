@@ -8,9 +8,10 @@ import com.fooddelivery.notification.service.TwilioSmsService;
 import org.springframework.stereotype.Component;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class SmsNotificationStrategy implements NotificationChannelStrategy {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SmsNotificationStrategy.class);
+
     private final ExotelSmsService exotelSmsService;
     private final TwilioSmsService twilioSmsService;
     private final java.util.concurrent.atomic.AtomicInteger consecutiveSmsTimeouts = new java.util.concurrent.atomic.AtomicInteger(0);

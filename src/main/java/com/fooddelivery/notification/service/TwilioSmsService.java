@@ -16,9 +16,10 @@ import java.util.Map;
 import java.net.URLEncoder;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class TwilioSmsService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwilioSmsService.class);
+
     @Value("${twilio.account.sid:dummy}")
     private String accountSid;
     @Value("${twilio.auth.token:dummy}")

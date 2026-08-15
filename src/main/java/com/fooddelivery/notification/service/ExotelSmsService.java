@@ -15,9 +15,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class ExotelSmsService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ExotelSmsService.class);
+
     @Value("${exotel.api.key}")
     private String apiKey;
     @Value("${exotel.api.token}")

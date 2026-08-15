@@ -10,9 +10,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/webhooks/providers")
+@lombok.extern.slf4j.Slf4j
 public class ProviderWebhookController {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProviderWebhookController.class);
+
     @Value("${platform.webhook.secret}")
     private String webhookSecret;
     private final AuditLogService auditLogService;

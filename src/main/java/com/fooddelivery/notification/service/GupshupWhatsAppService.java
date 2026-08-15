@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class GupshupWhatsAppService {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GupshupWhatsAppService.class);
+
     @Value("${gupshup.api.key}")
     private String apiKey;
     @Value("${gupshup.source.number}")

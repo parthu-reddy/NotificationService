@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class EmailNotificationStrategy implements NotificationChannelStrategy {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EmailNotificationStrategy.class);
+
     private final AwsSesEmailService awsSesEmailService;
     private final BrevoEmailService brevoEmailService;
     private final String activeEmailProvider;

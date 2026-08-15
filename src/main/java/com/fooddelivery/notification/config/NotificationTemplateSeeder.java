@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class NotificationTemplateSeeder implements CommandLineRunner {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationTemplateSeeder.class);
+
     private final NotificationTemplateRepository repository;
 
     @Override

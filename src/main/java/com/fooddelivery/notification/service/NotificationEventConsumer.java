@@ -14,9 +14,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class NotificationEventConsumer {
     @java.lang.SuppressWarnings("all")
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationEventConsumer.class);
+
     private final NotificationRouterService routerService;
     private final NotificationAuditLogRepository auditLogRepository;
 
