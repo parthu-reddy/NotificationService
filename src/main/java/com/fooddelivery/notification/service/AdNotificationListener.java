@@ -33,7 +33,7 @@ public class AdNotificationListener {
 
     @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), autoCreateTopics = "true", dltStrategy = DltStrategy.FAIL_ON_ERROR)
     @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE)
-    public void consumeAdEvent(@Payload String message) {
+    public void consumeAdEvent(@Payload String message, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
         try {
             JsonNode payloadNode = objectMapper.readTree(message);
             if (!payloadNode.has("eventType")) {
@@ -57,12 +57,29 @@ public class AdNotificationListener {
                     log.warn("Cannot send ad notification: missing advertiserId");
                     return;
                 }
-                NotificationRequestEvent notification = NotificationRequestEvent.builder().eventId(UUID.randomUUID().toString()).userId(UUID.fromString(advertiserIdStr)).channel(ChannelType.EMAIL).eventName(eventType.name()).payload(Map.of("message", "Campaign event: " + eventType.name())).build();
+                
+                String extractedEventId = com.fooddelivery.common.util.KafkaHeaderUtils.extractHeaderValue(headers, "eventId");
+                final String resolvedEventId;
+                if (extractedEventId == null) {
+                    resolvedEventId = UUID.nameUUIDFromBytes(message.getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString();
+                } else {
+                    resolvedEventId = extractedEventId;
+                }
+
+                NotificationRequestEvent notification = NotificationRequestEvent.builder()
+                        .eventId(resolvedEventId)
+                        .userId(UUID.fromString(advertiserIdStr))
+                        .channel(ChannelType.EMAIL)
+                        .eventName(eventType.name())
+                        .payload(Map.of("message", "Campaign event: " + eventType.name()))
+                        .build();
+                        
                 // Dispatch to the internal notification pipeline
-                notificationConsumer.consumeNotificationEvent(notification);
+                notificationConsumer.consumeNotificationEvent(notification, headers);
             }
         } catch (Exception e) {
             log.error("Failed to process ad event for notifications", e);
+            throw new RuntimeException(e);
         }
     }
 
