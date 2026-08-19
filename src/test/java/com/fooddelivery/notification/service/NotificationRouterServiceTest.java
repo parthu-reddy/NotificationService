@@ -66,10 +66,14 @@ public class NotificationRouterServiceTest {
         when(smsStrategy.getSupportedChannel()).thenReturn(ChannelType.SMS);
         when(emailStrategy.getSupportedChannel()).thenReturn(ChannelType.EMAIL);
         notificationRouterService = new NotificationRouterService(
-            rateLimitingService, templateRepository, userPreferenceRepository,
+            templateRepository, userPreferenceRepository,
             userDeviceRepository, auditLogRepository,
             java.util.List.of(smsStrategy, emailStrategy)
         );
+        // rateLimitingService moved from constructor injection to @Autowired(required = false)
+        // field injection, so it must be set directly here to keep the rate-limit assertion.
+        org.springframework.test.util.ReflectionTestUtils.setField(
+            notificationRouterService, "rateLimitingService", rateLimitingService);
     }
 
     @Test
