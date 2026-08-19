@@ -23,15 +23,15 @@ import java.util.stream.Collectors;
 public class NotificationRouterService {
     @java.lang.SuppressWarnings("all")
 
-    private final RateLimitingService rateLimitingService;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private RateLimitingService rateLimitingService;
     private final NotificationTemplateRepository templateRepository;
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserDeviceRepository userDeviceRepository;
     private final NotificationAuditLogRepository auditLogRepository;
     private final Map<ChannelType, NotificationChannelStrategy> strategyMap;
 
-    public NotificationRouterService(RateLimitingService rateLimitingService, NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies) {
-        this.rateLimitingService = rateLimitingService;
+    public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies) {
         this.templateRepository = templateRepository;
         this.userPreferenceRepository = userPreferenceRepository;
         this.userDeviceRepository = userDeviceRepository;
@@ -52,7 +52,9 @@ public class NotificationRouterService {
             return;
         }
         // Enforce rate limiting
-        rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName());
+        if (rateLimitingService != null) {
+            rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName());
+        }
         // Check user preferences
         UserPreference prefs = userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference()); // default to true
         if (!isChannelEnabled(prefs, event.getChannel())) {

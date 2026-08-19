@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 @Configuration
+@org.springframework.context.annotation.Profile("!contract-test")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "spring.redis.enabled", matchIfMissing = true)
 public class Bucket4jConfig {
 
     @Bean
