@@ -35,11 +35,15 @@ public class AdNotificationListener {
     @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE)
     public void consumeAdEvent(@Payload String message, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
         try {
-            JsonNode payloadNode = objectMapper.readTree(message);
-            if (!payloadNode.has("eventType")) {
+            JsonNode root = objectMapper.readTree(message);
+            // ad-events carries a FLAT Campaign with the event type in a Kafka header, so the
+            // previous body-only check returned immediately and advertisers never received
+            // budget-alert or campaign-paused notifications.
+            String eventTypeStr = com.fooddelivery.common.util.EventPayloadUtils.resolveEventType(root, headers);
+            if (eventTypeStr == null) {
                 return;
             }
-            String eventTypeStr = payloadNode.get("eventType").asText();
+            JsonNode payloadNode = com.fooddelivery.common.util.EventPayloadUtils.unwrapPayload(root);
             EventType eventType;
             try {
                 eventType = EventType.valueOf(eventTypeStr);
@@ -48,11 +52,9 @@ public class AdNotificationListener {
             }
             if (eventType == EventType.AD_BUDGET_ALERT || eventType == EventType.AD_CAMPAIGN_PAUSED) {
                 log.info("Processing Advertisement notification for event type: {}", eventType);
+                // unwrapPayload has already resolved the envelope-vs-flat distinction, including
+                // the double-encoded payload string, so no nested fallback is needed here.
                 String advertiserIdStr = payloadNode.path("advertiserId").asText(null);
-                if (advertiserIdStr == null && payloadNode.has("payload")) {
-                    JsonNode nested = objectMapper.readTree(payloadNode.get("payload").asText());
-                    advertiserIdStr = nested.path("advertiserId").asText(null);
-                }
                 if (advertiserIdStr == null || advertiserIdStr.isBlank()) {
                     log.warn("Cannot send ad notification: missing advertiserId");
                     return;
