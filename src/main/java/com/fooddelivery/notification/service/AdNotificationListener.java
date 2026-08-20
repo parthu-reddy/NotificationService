@@ -50,7 +50,7 @@ public class AdNotificationListener {
             } catch (IllegalArgumentException e) {
                 return;
             }
-            if (eventType == EventType.AD_BUDGET_ALERT || eventType == EventType.AD_CAMPAIGN_PAUSED) {
+            if (eventType == EventType.AD_CAMPAIGN_PAUSED) {
                 log.info("Processing Advertisement notification for event type: {}", eventType);
                 // unwrapPayload has already resolved the envelope-vs-flat distinction, including
                 // the double-encoded payload string, so no nested fallback is needed here.

@@ -54,8 +54,16 @@ brevo:
   api:
     key: dummy
 exotel:
+  account:
+    sid: dummy-sid
   api:
     key: dummy
+    token: dummy-token
+gupshup:
+  api:
+    key: dummy
+  source:
+    number: '910000000000'
 twilio:
   api:
     key: dummy
@@ -71,3 +79,7 @@ ondc:
 delivery:
   executive:
     radius: 5.0
+platform:
+  webhook:
+    secret: dummy-webhook-secret
+    base-url: http://localhost
