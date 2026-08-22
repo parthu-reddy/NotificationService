@@ -24,7 +24,7 @@ CREATE TABLE notification_audit_logs (
     updated_at TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY (template_id) REFERENCES notification_templates(id)
 );
-CREATE INDEX idx_provider_msg_id ON notification_audit_logs(provider_message_id);
+
 
 CREATE TABLE user_devices (
     id UUID PRIMARY KEY,
@@ -34,7 +34,7 @@ CREATE TABLE user_devices (
     is_active BOOLEAN DEFAULT TRUE,
     last_updated_at TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX idx_user_devices_user_id ON user_devices(user_id);
+
 
 CREATE TABLE user_preferences (
     id UUID PRIMARY KEY,
@@ -46,3 +46,8 @@ CREATE TABLE user_preferences (
 );
 
 
+
+
+CREATE INDEX idx_provider_msg_id ON notification_audit_logs(provider_message_id);
+
+CREATE INDEX idx_user_devices_user_id ON user_devices(user_id);
