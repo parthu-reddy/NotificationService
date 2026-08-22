@@ -1,5 +1,7 @@
 package com.fooddelivery.notification.contract;
 
+import com.fooddelivery.common.contract.KafkaStubMessageSender;
+
 import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.service.AdNotificationListener;
 import com.fooddelivery.notification.service.NotificationEventConsumer;

@@ -43,7 +43,7 @@ public class AdNotificationListener {
             if (eventTypeStr == null) {
                 return;
             }
-            JsonNode payloadNode = com.fooddelivery.common.util.EventPayloadUtils.unwrapPayload(root);
+            JsonNode payloadNode = root;
             EventType eventType;
             try {
                 eventType = EventType.valueOf(eventTypeStr);
@@ -52,8 +52,7 @@ public class AdNotificationListener {
             }
             if (eventType == EventType.AD_CAMPAIGN_PAUSED) {
                 log.info("Processing Advertisement notification for event type: {}", eventType);
-                // unwrapPayload has already resolved the envelope-vs-flat distinction, including
-                // the double-encoded payload string, so no nested fallback is needed here.
+                // Root node is now always the flat payload.
                 String advertiserIdStr = payloadNode.path("advertiserId").asText(null);
                 if (advertiserIdStr == null || advertiserIdStr.isBlank()) {
                     log.warn("Cannot send ad notification: missing advertiserId");

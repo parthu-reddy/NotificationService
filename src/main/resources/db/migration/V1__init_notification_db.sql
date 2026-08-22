@@ -6,9 +6,9 @@ CREATE TABLE notification_templates (
     external_template_id VARCHAR(100),
     external_entity_id VARCHAR(100),
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE
+    created_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT uk_notification_templates_event_name_channel UNIQUE (event_name, channel)
 );
-ALTER TABLE notification_templates ADD CONSTRAINT uk_notification_templates_event_name_channel UNIQUE (event_name, channel);
 
 CREATE TABLE notification_audit_logs (
     id UUID PRIMARY KEY,
