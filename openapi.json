@@ -1,1 +1,146 @@
-{"openapi":"3.0.1","info":{"title":"OpenAPI definition","version":"v0"},"servers":[{"url":"http://localhost:8081","description":"Generated server url"}],"paths":{"/webhooks/providers/exotel/status":{"post":{"tags":["provider-webhook-controller"],"operationId":"handleExotelCallback","parameters":[{"name":"payload","in":"query","required":true,"schema":{"type":"object","additionalProperties":{"type":"string"}}},{"name":"token","in":"query","required":false,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK"}}}},"/api/v1/notifications/devices":{"post":{"tags":["device-controller"],"operationId":"registerDevice","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DeviceRegistrationRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ApiResponseVoid"}}}}}}},"/api/v1/notifications/devices/{fcmToken}":{"delete":{"tags":["device-controller"],"operationId":"unregisterDevice","parameters":[{"name":"fcmToken","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ApiResponseVoid"}}}}}}}},"components":{"schemas":{"DeviceRegistrationRequest":{"required":["fcmToken","platform"],"type":"object","properties":{"fcmToken":{"type":"string"},"platform":{"type":"string"}}},"ApiResponseVoid":{"type":"object","properties":{"success":{"type":"boolean"},"message":{"type":"string"},"data":{"type":"object"},"timestamp":{"type":"string","format":"date-time"}}}}}}
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/webhooks/providers/exotel/status": {
+      "post": {
+        "tags": [
+          "provider-webhook-controller"
+        ],
+        "operationId": "handleExotelCallback",
+        "parameters": [
+          {
+            "name": "payload",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/devices": {
+      "post": {
+        "tags": [
+          "device-controller"
+        ],
+        "operationId": "registerDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceRegistrationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/devices/{fcmToken}": {
+      "delete": {
+        "tags": [
+          "device-controller"
+        ],
+        "operationId": "unregisterDevice",
+        "parameters": [
+          {
+            "name": "fcmToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DeviceRegistrationRequest": {
+        "required": [
+          "fcmToken",
+          "platform"
+        ],
+        "type": "object",
+        "properties": {
+          "fcmToken": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseVoid": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
