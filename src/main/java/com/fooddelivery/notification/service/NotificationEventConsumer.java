@@ -31,7 +31,7 @@ public class NotificationEventConsumer {
     // Initial attempt + 3 retries
     // 2s, 4s, 8s backoff
     @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), autoCreateTopics = "true", exclude = {TerminalNotificationException.class})
-    @KafkaListener(topics = com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, groupId = com.fooddelivery.common.constants.KafkaConstants.GROUP_NOTIFICATION_SERVICE)
+    @KafkaListener(topics = com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, groupId = com.fooddelivery.common.constants.KafkaConstants.GROUP_NOTIFICATION_SERVICE + "-notificationeventconsumer")
     public void consumeNotificationEvent(@Payload NotificationRequestEvent event, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
         log.info("Received notification request for user {} on channel {}", event.getUserId(), event.getChannel());
         

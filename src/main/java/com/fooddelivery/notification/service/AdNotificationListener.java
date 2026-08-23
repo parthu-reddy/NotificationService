@@ -32,7 +32,7 @@ public class AdNotificationListener {
     }
 
     @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), autoCreateTopics = "true", dltStrategy = DltStrategy.FAIL_ON_ERROR)
-    @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE)
+    @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE + "-adnotificationlistener")
     public void consumeAdEvent(@Payload String message, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
         try {
             JsonNode root = objectMapper.readTree(message);
