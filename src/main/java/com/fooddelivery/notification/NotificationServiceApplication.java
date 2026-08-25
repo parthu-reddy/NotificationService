@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootApplication(
     scanBasePackages = {"com.fooddelivery.notification", "com.fooddelivery.common"}
 )
-@org.springframework.boot.autoconfigure.domain.EntityScan(basePackages = {"com.fooddelivery.notification", "com.fooddelivery.common.entity"})
-@org.springframework.data.jpa.repository.config.EnableJpaRepositories(basePackages = {"com.fooddelivery.notification", "com.fooddelivery.common.repository"})
+@org.springframework.boot.autoconfigure.domain.EntityScan(basePackages = {"com.fooddelivery.notification", "com.fooddelivery.common"})
+@org.springframework.data.jpa.repository.config.EnableJpaRepositories(basePackages = {"com.fooddelivery.notification", "com.fooddelivery.common"})
 public class NotificationServiceApplication {
 
 	public static void main(String[] args) {
