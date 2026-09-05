@@ -33,6 +33,9 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         seedTemplate(com.fooddelivery.common.constants.EventType.PAYMENT_REFUNDED.name(), ChannelType.PUSH, "Your refund for order {1} has been successfully processed.");
         seedTemplate(com.fooddelivery.common.constants.EventType.ORDER_PARTIALLY_REFUNDED.name(), ChannelType.PUSH, "A partial refund has been issued for your order {1}.");
         seedTemplate(com.fooddelivery.common.constants.EventType.PAYMENT_PARTIALLY_REFUNDED.name(), ChannelType.PUSH, "A partial refund for order {1} has been successfully processed.");
+
+        seedTemplate(com.fooddelivery.common.constants.NotificationTemplate.REFUND_REQUESTED.name(), ChannelType.PUSH, "We have received your refund request for order {1} and it is being processed.");
+        seedTemplate(com.fooddelivery.common.constants.NotificationTemplate.REFUND_FAILED.name(), ChannelType.PUSH, "Unfortunately, the refund request for order {1} could not be processed. Please contact support.");
         
         log.info("Finished seeding notification templates.");
     }
