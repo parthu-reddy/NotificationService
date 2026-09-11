@@ -68,7 +68,8 @@ public class NotificationRouterServiceTest {
         notificationRouterService = new NotificationRouterService(
             templateRepository, userPreferenceRepository,
             userDeviceRepository, auditLogRepository,
-            java.util.List.of(smsStrategy, emailStrategy)
+            java.util.List.of(smsStrategy, emailStrategy),
+            new io.micrometer.core.instrument.simple.SimpleMeterRegistry()
         );
         // rateLimitingService moved from constructor injection to @Autowired(required = false)
         // field injection, so it must be set directly here to keep the rate-limit assertion.
@@ -87,7 +88,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_CREATED.name());
+        event.setEventName(com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID);
         event.setChannel(ChannelType.SMS);
         event.setExplicitRecipient("1234567890");
 
@@ -103,7 +104,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_CREATED.name());
+        event.setEventName(com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID);
         event.setChannel(ChannelType.SMS);
         event.setExplicitRecipient("1234567890");
 
@@ -113,14 +114,14 @@ public class NotificationRouterServiceTest {
 
         NotificationTemplate template = new NotificationTemplate();
         template.setContent("Your order is placed");
-        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_CREATED.name(), ChannelType.SMS))
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID.name(), ChannelType.SMS))
                 .thenReturn(Optional.of(template));
 
         when(smsStrategy.dispatch(any(), any())).thenReturn("sms-id-123");
 
         assertDoesNotThrow(() -> notificationRouterService.routeAndDispatch(event));
         verify(auditLogRepository, times(1)).save(any());
-        verify(rateLimitingService, times(1)).enforceRateLimit(userId.toString(), com.fooddelivery.common.constants.EventType.ORDER_CREATED.name());
+        verify(rateLimitingService, times(1)).enforceRateLimit(userId.toString(), com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID.name());
     }
 
     @Test
@@ -128,7 +129,7 @@ public class NotificationRouterServiceTest {
         NotificationRequestEvent event = new NotificationRequestEvent();
         UUID userId = UUID.randomUUID();
         event.setUserId(userId);
-        event.setEventName(com.fooddelivery.common.constants.EventType.ORDER_DELIVERED.name());
+        event.setEventName(com.fooddelivery.common.constants.NotificationTemplate.ORDER_DELIVERED);
         event.setChannel(ChannelType.EMAIL);
         event.setExplicitRecipient("user@example.com");
 
@@ -138,7 +139,7 @@ public class NotificationRouterServiceTest {
 
         NotificationTemplate template = new NotificationTemplate();
         template.setContent("Your order is delivered");
-        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.EventType.ORDER_DELIVERED.name(), ChannelType.EMAIL))
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue(com.fooddelivery.common.constants.NotificationTemplate.ORDER_DELIVERED.name(), ChannelType.EMAIL))
                 .thenReturn(Optional.of(template));
 
         when(emailStrategy.dispatch(any(), any())).thenReturn("email-id-123");

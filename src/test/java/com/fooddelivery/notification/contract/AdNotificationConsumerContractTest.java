@@ -2,6 +2,7 @@ package com.fooddelivery.notification.contract;
 
 import com.fooddelivery.common.contract.KafkaStubMessageSender;
 
+import com.fooddelivery.common.constants.NotificationTemplate;
 import com.fooddelivery.common.event.NotificationRequestEvent;
 import com.fooddelivery.notification.service.AdNotificationListener;
 import com.fooddelivery.notification.service.NotificationEventConsumer;
@@ -72,7 +73,11 @@ class AdNotificationConsumerContractTest {
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(notificationConsumer).consumeNotificationEvent(captor.capture(), any());
-            assertThat(captor.getValue().getEventName()).isEqualTo("AD_CAMPAIGN_PAUSED");
+            // The enum, not the string. `isEqualTo` takes an Object, so comparing the typed field
+            // against "AD_CAMPAIGN_PAUSED" still compiles -- and fails, 15 seconds later, with
+            // `expected: "AD_CAMPAIGN_PAUSED" but was: AD_CAMPAIGN_PAUSED`.
+            assertThat(captor.getValue().getEventName())
+                    .isEqualTo(NotificationTemplate.AD_CAMPAIGN_PAUSED);
             assertThat(captor.getValue().getUserId()).isNotNull();
         });
     }

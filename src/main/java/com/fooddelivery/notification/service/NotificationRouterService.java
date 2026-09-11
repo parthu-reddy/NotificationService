@@ -30,8 +30,10 @@ public class NotificationRouterService {
     private final UserDeviceRepository userDeviceRepository;
     private final NotificationAuditLogRepository auditLogRepository;
     private final Map<ChannelType, NotificationChannelStrategy> strategyMap;
+    private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
 
-    public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies) {
+    public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies, io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
         this.templateRepository = templateRepository;
         this.userPreferenceRepository = userPreferenceRepository;
         this.userDeviceRepository = userDeviceRepository;
@@ -53,7 +55,7 @@ public class NotificationRouterService {
         }
         // Enforce rate limiting
         if (rateLimitingService != null) {
-            rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName());
+            rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName().name());
         }
         // Check user preferences
         UserPreference prefs = userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference()); // default to true
@@ -61,7 +63,9 @@ public class NotificationRouterService {
             throw new UserOptedOutException("User opted out of " + event.getChannel() + " channel.");
         }
         // Fetch template
-        NotificationTemplate template = templateRepository.findByEventNameAndChannelAndIsActiveTrue(event.getEventName(), event.getChannel()).orElseThrow(() -> new InvalidTemplateException("Template not found for " + event.getEventName() + " on " + event.getChannel()));
+        NotificationTemplate template = templateRepository
+                .findByEventNameAndChannelAndIsActiveTrue(event.getEventName().name(), event.getChannel())
+                .orElseThrow(() -> missingTemplate(event));
         String providerMessageId = null;
         try {
             NotificationChannelStrategy strategy = strategyMap.get(event.getChannel());
@@ -79,6 +83,26 @@ public class NotificationRouterService {
         if (providerMessageId != null) {
             createAuditLog(event, template, providerMessageId, DeliveryStatus.QUEUED, null);
         }
+    }
+
+    /**
+     * A configuration fault, counted so it is visible before a customer notices.
+     *
+     * <p>The exception is already terminal -- {@code NotificationEventConsumer} excludes
+     * {@code TerminalNotificationException} from retry -- so a missing template goes straight to the
+     * DLT handler and lands in {@code notification_audit_logs}. That is a table nobody watches. Eight
+     * emitted codes had no template for months and the only trace was rows in it.
+     */
+    private InvalidTemplateException missingTemplate(NotificationRequestEvent event) {
+        if (meterRegistry != null) {
+            meterRegistry.counter("notification_template_missing_total",
+                    "event", event.getEventName().name(),
+                    "channel", event.getChannel().name()).increment();
+        }
+        log.error("NO TEMPLATE for {} on {}. This notification cannot be delivered to anyone until "
+                + "a template is seeded.", event.getEventName(), event.getChannel());
+        return new InvalidTemplateException(
+                "Template not found for " + event.getEventName() + " on " + event.getChannel());
     }
 
     private boolean isChannelEnabled(UserPreference prefs, ChannelType channel) {

@@ -34,7 +34,16 @@ public class NotificationMcpService {
             NotificationRequestEvent event = new NotificationRequestEvent();
             event.setEventId(UUID.randomUUID().toString());
             event.setUserId(UUID.fromString(userId));
-            event.setEventName(eventName);
+            // An operator-supplied code. Rejecting an unknown one here is the point of the typed
+            // field: it used to be passed through as a String and failed later, inside the router,
+            // as "template not found" -- indistinguishable from a genuinely missing template.
+            try {
+                event.setEventName(com.fooddelivery.common.constants.NotificationTemplate.valueOf(eventName));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Unknown notification code '" + eventName
+                        + "'. Known codes: "
+                        + java.util.Arrays.toString(com.fooddelivery.common.constants.NotificationTemplate.values()), e);
+            }
             event.setChannel(ChannelType.valueOf(channelType.toUpperCase()));
             event.setExplicitRecipient(explicitRecipient);
             notificationRouterService.routeAndDispatch(event);

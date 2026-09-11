@@ -71,7 +71,7 @@ public class AdNotificationListener {
                         .eventId(resolvedEventId)
                         .userId(UUID.fromString(advertiserIdStr))
                         .channel(ChannelType.EMAIL)
-                        .eventName(eventType.name())
+                        .eventName(com.fooddelivery.common.constants.NotificationTemplate.AD_CAMPAIGN_PAUSED)
                         .payload(Map.of("message", "Campaign event: " + eventType.name()))
                         .build();
                         

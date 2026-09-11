@@ -26,7 +26,7 @@ public class PushNotificationStrategy implements NotificationChannelStrategy {
         if (devices.isEmpty()) {
             throw new com.fooddelivery.notification.exception.RecipientUnreachableException("No active devices found for user.");
         }
-        String eventName = event.getEventName() != null ? event.getEventName() : "NOTIFICATION";
+        String eventName = event.getEventName() != null ? event.getEventName().name() : "NOTIFICATION";
         String title = java.util.Arrays.stream(eventName.toLowerCase().split("_")).map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1)).collect(Collectors.joining(" "));
         String body = hydrateTemplate(template.getContent(), event.getTemplateParams());
         if (devices.size() == 1) {
