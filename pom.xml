@@ -34,25 +34,34 @@
 	<dependencies>
         <dependency>
             <groupId>com.fooddelivery</groupId>
-            <artifactId>common-library</artifactId>
+            <artifactId>common-core</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
-
-
-        <dependency> 
-            <groupId>com.fooddelivery</groupId> 
-            <artifactId>common-library</artifactId> 
-        </dependency>
-        
         <dependency>
             <groupId>com.fooddelivery</groupId>
-            <artifactId>common-library</artifactId>
+            <artifactId>common-messaging</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.fooddelivery</groupId>
+            <artifactId>common-persistence</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fooddelivery</groupId>
+            <artifactId>common-web</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fooddelivery</groupId>
+            <artifactId>common-test</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -72,6 +81,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<!-- Declared explicitly on 2026-09-12. DeviceController uses @PreAuthorize, and this
+		     starter arrived transitively through common-library until the split. Nothing in this
+		     service references a common-web class from main, so it takes the starter directly rather
+		     than a module it does not use. -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
 		<dependency>
