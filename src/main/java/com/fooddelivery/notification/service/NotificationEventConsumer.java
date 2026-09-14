@@ -22,17 +22,21 @@ public class NotificationEventConsumer {
 
     private final NotificationRouterService routerService;
     private final NotificationAuditLogRepository auditLogRepository;
+    private final com.fooddelivery.common.event.EventBinder eventBinder;
 
-    public NotificationEventConsumer(NotificationRouterService routerService, NotificationAuditLogRepository auditLogRepository) {
+    public NotificationEventConsumer(NotificationRouterService routerService, NotificationAuditLogRepository auditLogRepository, com.fooddelivery.common.event.EventBinder eventBinder) {
         this.routerService = routerService;
         this.auditLogRepository = auditLogRepository;
+        this.eventBinder = eventBinder;
     }
 
     // Initial attempt + 3 retries
     // 2s, 4s, 8s backoff
-    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), autoCreateTopics = "true", exclude = {TerminalNotificationException.class})
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 10000), autoCreateTopics = "true", exclude = {com.fooddelivery.common.event.EventBindingException.class, TerminalNotificationException.class}, traversingCauses = "true")
     @KafkaListener(topics = com.fooddelivery.common.constants.KafkaConstants.TOPIC_NOTIFICATIONS_DISPATCH, groupId = com.fooddelivery.common.constants.KafkaConstants.GROUP_NOTIFICATION_SERVICE + "-notificationeventconsumer")
-    public void consumeNotificationEvent(@Payload NotificationRequestEvent event, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
+    public void consumeNotificationEvent(String payload, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
+        NotificationRequestEvent event = eventBinder.bind(payload, NotificationRequestEvent.class);
+
         log.info("Received notification request for user {} on channel {}", event.getUserId(), event.getChannel());
         
         String extractedEventId = com.fooddelivery.common.util.KafkaHeaderUtils.extractHeaderValue(headers, "eventId");
@@ -51,17 +55,27 @@ public class NotificationEventConsumer {
     }
 
     @DltHandler
-    public void processDeadLetterTopic(@Payload(required = false) NotificationRequestEvent failedEvent, @org.springframework.messaging.handler.annotation.Header(name = org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE, required = false) String exceptionMessage) {
-        if (failedEvent == null) {
+    public void processDeadLetterTopic(@Payload(required = false) String failedPayload, @org.springframework.messaging.handler.annotation.Header(name = org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE, required = false) String exceptionMessage) {
+        if (failedPayload == null) {
             log.error("Received bad payload in DLT. Exception: {}", exceptionMessage);
             return;
         }
-        log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", failedEvent.getEventId(), exceptionMessage);
+        
+        NotificationRequestEvent failedEvent = null;
+        try {
+            failedEvent = eventBinder.bind(failedPayload, NotificationRequestEvent.class);
+        } catch (Exception e) {
+            log.warn("Could not parse payload in DLT: {}", failedPayload);
+        }
+        
+        String eventId = failedEvent != null && failedEvent.getEventId() != null ? failedEvent.getEventId() : "UNKNOWN";
+        log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", eventId, exceptionMessage);
+        
         NotificationAuditLog auditLog = new NotificationAuditLog();
         // Provide fallbacks for malformed payloads to avoid DB constraint violations
-        auditLog.setUserId(failedEvent.getUserId() != null ? failedEvent.getUserId() : new java.util.UUID(0L, 0L));
-        auditLog.setChannel(failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.common.enums.ChannelType.EMAIL);
-        auditLog.setRecipientAddress(failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
+        auditLog.setUserId(failedEvent != null && failedEvent.getUserId() != null ? failedEvent.getUserId() : new java.util.UUID(0L, 0L));
+        auditLog.setChannel(failedEvent != null && failedEvent.getChannel() != null ? failedEvent.getChannel() : com.fooddelivery.common.enums.ChannelType.EMAIL);
+        auditLog.setRecipientAddress(failedEvent != null && failedEvent.getExplicitRecipient() != null && !failedEvent.getExplicitRecipient().isBlank() ? failedEvent.getExplicitRecipient() : "unknown");
         auditLog.setStatus(DeliveryStatus.FAILED);
         auditLog.setErrorReason("DLT Intervention: " + exceptionMessage);
         auditLogRepository.save(auditLog);

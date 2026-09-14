@@ -48,7 +48,12 @@ class AdNotificationConsumerContractTest {
     @org.springframework.boot.SpringBootConfiguration
     @org.springframework.boot.autoconfigure.EnableAutoConfiguration
     
-    @Import(AdNotificationListener.class)
+    // EventBinder: the consumer now needs one, and a sliced context does not inherit the
+// application's scan of com.fooddelivery.common. Imported directly rather than via a
+// helper @Configuration in common-test -- such a class sits in an unlayered package and
+// depending on ..event.. (the Service layer) fails ArchitectureEnforcementTest in every
+// module. Spring builds it from the context's ObjectMapper and Validator.
+@Import({AdNotificationListener.class, com.fooddelivery.common.event.EventBinder.class})
     static class TestConfig {
         @Bean
         public MessageVerifierSender<Message<?>> kafkaStubMessageSender(KafkaTemplate<String, String> t) {
@@ -66,17 +71,21 @@ class AdNotificationConsumerContractTest {
     void dispatchesAnAdvertiserNotificationOnCampaignPaused() {
         stubTrigger.trigger("ad_events_paused");
 
-        ArgumentCaptor<NotificationRequestEvent> captor =
-                ArgumentCaptor.forClass(NotificationRequestEvent.class);
+        // The listener takes the raw String and binds inside, the way Spring Kafka delivers it --
+        // the platform uses a String deserializer, so capturing a typed argument here would assert
+        // a signature production does not have. Capture the wire payload and bind it the same way
+        // the consumer does.
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(notificationConsumer).consumeNotificationEvent(captor.capture(), any());
+            NotificationRequestEvent event = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(captor.getValue(), NotificationRequestEvent.class);
             // The enum, not the string. `isEqualTo` takes an Object, so comparing the typed field
             // against "AD_CAMPAIGN_PAUSED" still compiles -- and fails, 15 seconds later, with
             // `expected: "AD_CAMPAIGN_PAUSED" but was: AD_CAMPAIGN_PAUSED`.
-            assertThat(captor.getValue().getEventName())
-                    .isEqualTo(NotificationTemplate.AD_CAMPAIGN_PAUSED);
-            assertThat(captor.getValue().getUserId()).isNotNull();
+            assertThat(event.getEventName()).isEqualTo(NotificationTemplate.AD_CAMPAIGN_PAUSED);
+            assertThat(event.getUserId()).isNotNull();
         });
     }
 }

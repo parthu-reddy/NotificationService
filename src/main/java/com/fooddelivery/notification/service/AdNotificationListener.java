@@ -26,24 +26,25 @@ public class AdNotificationListener {
     private final NotificationEventConsumer notificationConsumer;
     private final ObjectMapper objectMapper;
 
-    public AdNotificationListener(NotificationEventConsumer notificationConsumer, ObjectMapper objectMapper) {
+        private final com.fooddelivery.common.event.EventBinder eventBinder;
+
+public AdNotificationListener(NotificationEventConsumer notificationConsumer, ObjectMapper objectMapper, com.fooddelivery.common.event.EventBinder eventBinder) {
+        this.eventBinder = eventBinder;
         this.notificationConsumer = notificationConsumer;
         this.objectMapper = objectMapper;
     }
 
-    @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), autoCreateTopics = "true", dltStrategy = DltStrategy.FAIL_ON_ERROR)
+    @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), autoCreateTopics = "true", dltStrategy = DltStrategy.FAIL_ON_ERROR, exclude = {com.fooddelivery.common.event.EventBindingException.class}, traversingCauses = "true")
     @KafkaListener(topics = KafkaConstants.TOPIC_AD_EVENTS, groupId = KafkaConstants.GROUP_NOTIFICATION_SERVICE + "-adnotificationlistener")
     public void consumeAdEvent(@Payload String message, @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
         try {
-            JsonNode root = objectMapper.readTree(message);
-            // ad-events carries a FLAT Campaign with the event type in a Kafka header, so the
-            // previous body-only check returned immediately and advertisers never received
-            // budget-alert or campaign-paused notifications.
-            String eventTypeStr = com.fooddelivery.common.util.EventPayloadUtils.resolveEventType(root, headers);
+            // ad-events carries the event type in a Kafka header and CampaignChangedEvent flat in
+            // the body. A body-only check used to return immediately here, so advertisers never
+            // received budget-alert or campaign-paused notifications at all.
+            String eventTypeStr = com.fooddelivery.common.util.KafkaHeaderUtils.extractEventType(headers, null);
             if (eventTypeStr == null) {
                 return;
             }
-            JsonNode payloadNode = root;
             EventType eventType;
             try {
                 eventType = EventType.valueOf(eventTypeStr);
@@ -52,12 +53,17 @@ public class AdNotificationListener {
             }
             if (eventType == EventType.AD_CAMPAIGN_PAUSED) {
                 log.info("Processing Advertisement notification for event type: {}", eventType);
-                // Root node is now always the flat payload.
-                String advertiserIdStr = payloadNode.path("advertiserId").asText(null);
-                if (advertiserIdStr == null || advertiserIdStr.isBlank()) {
+                com.fooddelivery.common.event.CampaignChangedEvent event = eventBinder.bindIf(
+                        eventType, eventTypeStr, message,
+                        com.fooddelivery.common.event.CampaignChangedEvent.class)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "bindIf returned empty for " + eventTypeStr
+                                        + " despite an exact event-type match"));
+                if (event.getAdvertiserId() == null) {
                     log.warn("Cannot send ad notification: missing advertiserId");
                     return;
                 }
+                String advertiserIdStr = event.getAdvertiserId().toString();
                 
                 String extractedEventId = com.fooddelivery.common.util.KafkaHeaderUtils.extractHeaderValue(headers, "eventId");
                 final String resolvedEventId;
@@ -76,9 +82,8 @@ public class AdNotificationListener {
                         .build();
                         
                 // Dispatch to the internal notification pipeline
-                notificationConsumer.consumeNotificationEvent(notification, headers);
-            }
-        } catch (Exception e) {
+                notificationConsumer.consumeNotificationEvent(objectMapper.writeValueAsString(notification), headers);
+            }        } catch (Exception e) {
             log.error("Failed to process ad event for notifications", e);
             throw new RuntimeException(e);
         }

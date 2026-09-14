@@ -84,8 +84,10 @@ class MissingTemplateIsTerminalTest {
     void theConsumerExcludesTerminalFailuresFromRetry() throws Exception {
         // The exception being terminal only matters if the listener honours it. Assert the wiring,
         // not the intent.
+        // String, not NotificationRequestEvent: the listener takes the raw wire payload and binds
+        // it internally, because the platform's Kafka consumers use a String deserializer.
         Method listener = NotificationEventConsumer.class.getMethod("consumeNotificationEvent",
-                NotificationRequestEvent.class, java.util.Map.class);
+                String.class, java.util.Map.class);
         RetryableTopic retryable = listener.getAnnotation(RetryableTopic.class);
         assertNotNull(retryable, "the listener must carry @RetryableTopic");
         assertTrue(List.of(retryable.exclude()).contains(TerminalNotificationException.class),
