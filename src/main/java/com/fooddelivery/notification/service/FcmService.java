@@ -43,9 +43,13 @@ public class FcmService {
     /**
      * Multicast messaging for driver fleet broadcasts.
      */
-    public void sendMulticastNotification(List<String> tokens, String title, String body) throws FirebaseMessagingException {
+    public void sendMulticastNotification(List<String> tokens, String title, String body, Map<String, String> payload) throws FirebaseMessagingException {
         // FCM limits multicast payloads to 500 tokens per batch
-        MulticastMessage message = MulticastMessage.builder().addAllTokens(tokens).setNotification(Notification.builder().setTitle(title).setBody(body).build()).build();
+        MulticastMessage message = MulticastMessage.builder()
+                .addAllTokens(tokens)
+                .setNotification(Notification.builder().setTitle(title).setBody(body).build())
+                .putAllData(payload != null ? payload : Map.of())
+                .build();
         BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
         if (response.getFailureCount() > 0) {
             log.warn("{} messages failed to deliver in multicast batch.", response.getFailureCount());

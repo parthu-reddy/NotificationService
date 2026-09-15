@@ -32,7 +32,7 @@ public class PushNotificationStrategy implements NotificationChannelStrategy {
         if (devices.size() == 1) {
             return fcmService.sendDirectNotification(devices.get(0).getFcmToken(), title, body, event.getPayload());
         } else {
-            fcmService.sendMulticastNotification(devices.stream().map(UserDevice::getFcmToken).collect(Collectors.toList()), title, body);
+            fcmService.sendMulticastNotification(devices.stream().map(UserDevice::getFcmToken).collect(Collectors.toList()), title, body, event.getPayload());
             return "multicast-" + event.getEventId();
         }
     }
