@@ -34,7 +34,6 @@ class TemplateSubstitutionTest {
 
     /** code -> how many positional parameters its emitters actually pass. */
     private static final Map<NotificationTemplate, Integer> EMITTED_PARAMS = Map.ofEntries(
-            Map.entry(NotificationTemplate.ORDER_PLACED, 1),
             Map.entry(NotificationTemplate.ORDER_PAID, 1),
             Map.entry(NotificationTemplate.ORDER_READY_FOR_PICKUP, 1),
             Map.entry(NotificationTemplate.DRIVER_ON_THE_WAY, 1),

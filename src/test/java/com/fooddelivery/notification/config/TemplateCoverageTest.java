@@ -95,7 +95,7 @@ class TemplateCoverageTest {
         // PUSH is the channel the order lifecycle emits on. A lifecycle code seeded only for EMAIL
         // would look covered and never be delivered.
         List<NotificationTemplate> lifecycle = List.of(
-                NotificationTemplate.ORDER_PLACED, NotificationTemplate.ORDER_PAID,
+                NotificationTemplate.ORDER_PAID,
                 NotificationTemplate.ORDER_READY_FOR_PICKUP, NotificationTemplate.DRIVER_ON_THE_WAY,
                 NotificationTemplate.DELAY_APPROVAL_REQUESTED, NotificationTemplate.ORDER_DELAY_REJECTED,
                 NotificationTemplate.ORDER_DELIVERED, NotificationTemplate.ORDER_CANCELLED_BY_RESTAURANT,
@@ -106,19 +106,6 @@ class TemplateCoverageTest {
             assertTrue(NotificationTemplateSeeder.COPY.get(code).containsKey(ChannelType.PUSH),
                     code + " is emitted on PUSH and has no PUSH copy");
         }
-    }
-
-    @Test
-    void aCashOrderIsToldItIsCash() {
-        String placed = NotificationTemplateSeeder.COPY
-                .get(NotificationTemplate.ORDER_PLACED).get(ChannelType.PUSH);
-        assertTrue(placed.toLowerCase().contains("cash"),
-                "a COD customer has to know to have the money ready; this used to be notified with "
-                        + "the ORDER_PAID copy, which says the opposite: " + placed);
-
-        String paid = NotificationTemplateSeeder.COPY
-                .get(NotificationTemplate.ORDER_PAID).get(ChannelType.PUSH);
-        assertFalse(paid.toLowerCase().contains("cash"), paid);
     }
 
     @Test

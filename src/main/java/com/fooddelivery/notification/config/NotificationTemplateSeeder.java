@@ -51,8 +51,6 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         Map<NotificationTemplate, Map<ChannelType, String>> copy = new EnumMap<>(NotificationTemplate.class);
 
         // -- Order lifecycle. One parameter: {1} is the order id. -------------------------------
-        push(copy, NotificationTemplate.ORDER_PLACED,
-                "Order {1} is confirmed. Please keep the cash ready to pay the rider on delivery.");
         push(copy, NotificationTemplate.ORDER_PAID,
                 "Payment received. Order {1} is confirmed and the restaurant is preparing it.");
         push(copy, NotificationTemplate.ORDER_READY_FOR_PICKUP,
