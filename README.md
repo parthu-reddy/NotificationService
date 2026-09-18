@@ -11,3 +11,4 @@ The NotificationService is responsible for dispatching multi-channel communicati
 - **Event Consumption**: Listens to Kafka topics (e.g., `notification-events`) for generic notification requests.
 - **Provider Strategy**: Dynamically selects the appropriate communication provider (e.g., SendGrid for email, Twilio for SMS) based on the channel specified.
 - **Security**: Ensures any internal API exposed is guarded by the `PreAuthFilter`.
+
