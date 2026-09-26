@@ -3,7 +3,7 @@ package com.fooddelivery.notification.domain;
 import com.fooddelivery.common.enums.ChannelType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -28,7 +28,7 @@ public class NotificationTemplate {
     private Boolean isActive = true;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
     @java.lang.SuppressWarnings("all")
     public NotificationTemplate() {
@@ -70,7 +70,7 @@ public class NotificationTemplate {
     }
 
     @java.lang.SuppressWarnings("all")
-    public OffsetDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return this.createdAt;
     }
 
@@ -110,7 +110,7 @@ public class NotificationTemplate {
     }
 
     @java.lang.SuppressWarnings("all")
-    public void setCreatedAt(final OffsetDateTime createdAt) {
+    public void setCreatedAt(final Instant createdAt) {
         this.createdAt = createdAt;
     }
 

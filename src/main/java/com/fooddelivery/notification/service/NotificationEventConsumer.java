@@ -55,9 +55,11 @@ public class NotificationEventConsumer {
     }
 
     @DltHandler
-    public void processDeadLetterTopic(@Payload(required = false) String failedPayload, @org.springframework.messaging.handler.annotation.Header(name = org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE, required = false) String exceptionMessage) {
+    public void processDeadLetterTopic(@Payload(required = false) String failedPayload, @org.springframework.messaging.handler.annotation.Header(name = org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE, required = false) String exceptionMessage,
+                                       @org.springframework.messaging.handler.annotation.Headers java.util.Map<String, Object> headers) {
+        String replay = com.fooddelivery.common.util.KafkaHeaderUtils.deadLetterPosition(headers);
         if (failedPayload == null) {
-            log.error("Received bad payload in DLT. Exception: {}", exceptionMessage);
+            log.error("Received bad payload in DLT. Exception: {} replay={}", exceptionMessage, replay);
             return;
         }
         
@@ -69,7 +71,7 @@ public class NotificationEventConsumer {
         }
         
         String eventId = failedEvent != null && failedEvent.getEventId() != null ? failedEvent.getEventId() : "UNKNOWN";
-        log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {}", eventId, exceptionMessage);
+        log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {} replay={}", eventId, exceptionMessage, replay);
         
         NotificationAuditLog auditLog = new NotificationAuditLog();
         // Provide fallbacks for malformed payloads to avoid DB constraint violations

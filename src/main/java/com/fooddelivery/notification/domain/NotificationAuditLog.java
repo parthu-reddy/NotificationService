@@ -4,7 +4,7 @@ import com.fooddelivery.common.enums.ChannelType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -35,10 +35,10 @@ public class NotificationAuditLog {
     private String errorReason;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    private Instant updatedAt;
 
     @java.lang.SuppressWarnings("all")
     public NotificationAuditLog() {
@@ -90,12 +90,12 @@ public class NotificationAuditLog {
     }
 
     @java.lang.SuppressWarnings("all")
-    public OffsetDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return this.createdAt;
     }
 
     @java.lang.SuppressWarnings("all")
-    public OffsetDateTime getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return this.updatedAt;
     }
 
@@ -145,12 +145,12 @@ public class NotificationAuditLog {
     }
 
     @java.lang.SuppressWarnings("all")
-    public void setCreatedAt(final OffsetDateTime createdAt) {
+    public void setCreatedAt(final Instant createdAt) {
         this.createdAt = createdAt;
     }
 
     @java.lang.SuppressWarnings("all")
-    public void setUpdatedAt(final OffsetDateTime updatedAt) {
+    public void setUpdatedAt(final Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
 

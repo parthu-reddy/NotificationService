@@ -1,7 +1,7 @@
 package com.fooddelivery.notification.domain;
 
 import jakarta.persistence.*;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -20,7 +20,7 @@ public class UserDevice {
     @Column(name = "is_active")
     private Boolean isActive = true;
     @Column(name = "last_updated_at")
-    private OffsetDateTime lastUpdatedAt;
+    private Instant lastUpdatedAt;
 
     @java.lang.SuppressWarnings("all")
     public UserDevice() {
@@ -52,7 +52,7 @@ public class UserDevice {
     }
 
     @java.lang.SuppressWarnings("all")
-    public OffsetDateTime getLastUpdatedAt() {
+    public Instant getLastUpdatedAt() {
         return this.lastUpdatedAt;
     }
 
@@ -82,7 +82,7 @@ public class UserDevice {
     }
 
     @java.lang.SuppressWarnings("all")
-    public void setLastUpdatedAt(final OffsetDateTime lastUpdatedAt) {
+    public void setLastUpdatedAt(final Instant lastUpdatedAt) {
         this.lastUpdatedAt = lastUpdatedAt;
     }
 

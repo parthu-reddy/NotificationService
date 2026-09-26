@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -101,7 +101,7 @@ public class DeviceController {
             device.setUserId(userId);
             device.setIsActive(true);
             device.setPlatform(request.getPlatform());
-            device.setLastUpdatedAt(OffsetDateTime.now());
+            device.setLastUpdatedAt(Instant.now());
             userDeviceRepository.save(device);
         } else {
             UserDevice device = new UserDevice();
@@ -109,7 +109,7 @@ public class DeviceController {
             device.setFcmToken(request.getFcmToken());
             device.setPlatform(request.getPlatform());
             device.setIsActive(true);
-            device.setLastUpdatedAt(OffsetDateTime.now());
+            device.setLastUpdatedAt(Instant.now());
             userDeviceRepository.save(device);
         }
         return ResponseEntity.ok(ApiResponse.<Void>builder().success(true).message("Device registered successfully").build());
@@ -123,7 +123,7 @@ public class DeviceController {
         if (existing.isPresent() && existing.get().getUserId().equals(userId)) {
             UserDevice device = existing.get();
             device.setIsActive(false);
-            device.setLastUpdatedAt(OffsetDateTime.now());
+            device.setLastUpdatedAt(Instant.now());
             userDeviceRepository.save(device);
         }
         return ResponseEntity.ok(ApiResponse.<Void>builder().success(true).message("Device unregistered successfully").build());
