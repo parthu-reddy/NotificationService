@@ -13,7 +13,7 @@ CREATE TABLE notification_templates (
 CREATE TABLE notification_audit_logs (
     id UUID PRIMARY KEY,
     event_id VARCHAR(255) UNIQUE,
-    user_id UUID NOT NULL,
+    user_id UUID,
     channel VARCHAR(255) NOT NULL,
     recipient_address VARCHAR(255) NOT NULL,
     template_id UUID,
