@@ -70,4 +70,41 @@ class AdNotificationListenerTest {
 
         verify(notifications).consumeNotificationEvent(contains(advertiserId.toString()), anyMap());
     }
+
+    @Test
+    void deployedDeserializerPreservesCampaignBytesBeforeTheListenerFiltersByType() throws Exception {
+        var yaml = new org.springframework.beans.factory.config.YamlPropertiesFactoryBean();
+        yaml.setResources(new org.springframework.core.io.FileSystemResource("../Deployment/notification-service.yml"));
+        var properties = yaml.getObject();
+        var configuration = new java.util.HashMap<String, Object>();
+        String prefix = "spring.kafka.consumer.properties.";
+        properties.forEach((key, value) -> {
+            if (key.toString().startsWith(prefix)) configuration.put(key.toString().substring(prefix.length()), value);
+        });
+        try (var deserializer = (org.apache.kafka.common.serialization.Deserializer<?>) Class.forName(
+                properties.getProperty("spring.kafka.consumer.value-deserializer")).getConstructor().newInstance()) {
+            deserializer.configure(configuration, false);
+            String message = paused();
+            Object decoded = deserializer.deserialize("ad-events", message.getBytes(StandardCharsets.UTF_8));
+            assertThat(decoded).isInstanceOf(String.class).isEqualTo(message);
+            listener.consumeAdEvent((String) decoded, Map.of("eventType", "AD_CAMPAIGN_CREATED"));
+            verifyNoInteractions(notifications);
+            listener.consumeAdEvent((String) decoded, Map.of("eventType", "AD_CAMPAIGN_PAUSED"));
+            verify(notifications).consumeNotificationEvent(contains(advertiserId.toString()), anyMap());
+        }
+    }
+
+    @Test
+    void deployedRetrySerializerPreservesTheOriginalJsonInsteadOfQuotingOrRebindingIt() throws Exception {
+        var yaml = new org.springframework.beans.factory.config.YamlPropertiesFactoryBean();
+        yaml.setResources(new org.springframework.core.io.FileSystemResource("../Deployment/notification-service.yml"));
+        @SuppressWarnings("unchecked")
+        var serializer = (org.apache.kafka.common.serialization.Serializer<Object>) Class.forName(
+                yaml.getObject().getProperty("spring.kafka.producer.value-serializer")).getConstructor().newInstance();
+        try (serializer) {
+            serializer.configure(Map.of(), false);
+            String message = paused();
+            assertThat(serializer.serialize("ad-events-dlt", message)).isEqualTo(message.getBytes(StandardCharsets.UTF_8));
+        }
+    }
 }
