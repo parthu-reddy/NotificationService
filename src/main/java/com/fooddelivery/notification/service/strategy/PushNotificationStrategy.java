@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@org.springframework.context.annotation.Profile("!dev | prod")
 public class PushNotificationStrategy implements NotificationChannelStrategy {
     private final UserDeviceRepository userDeviceRepository;
     private final FcmService fcmService;

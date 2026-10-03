@@ -29,10 +29,31 @@ import org.springframework.boot.test.context.SpringBootTest;
         "eureka.client.enabled=false",
         "spring.cloud.config.enabled=false"
 })
+@org.springframework.test.context.ActiveProfiles("dev")
 class NotificationServiceApplicationTests extends BaseIntegrationTest {
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.context.ApplicationContext context;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.fooddelivery.notification.repository.NotificationAuditLogRepository auditLogs;
+
+    @Test
+    void aPreaccountNotificationAuditPersistsWithoutAnInventedUser() {
+        var row = new com.fooddelivery.notification.domain.NotificationAuditLog();
+        row.setEventId(java.util.UUID.randomUUID().toString());
+        row.setChannel(com.fooddelivery.common.enums.ChannelType.SMS);
+        row.setRecipientAddress("8999123456");
+        var saved = auditLogs.saveAndFlush(row);
+        org.junit.jupiter.api.Assertions.assertNull(auditLogs.findById(saved.getId()).orElseThrow().getUserId());
+    }
 
 	@Test
 	void contextLoads() {
+
+        org.junit.jupiter.api.Assertions.assertFalse(context.containsBean("firebaseConfig"));
+        var channels = context.getBeansOfType(com.fooddelivery.notification.service.strategy.NotificationChannelStrategy.class);
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Set.of("devSms", "devEmail", "devWhatsApp", "devPush"), channels.keySet());
 	}
 
 }

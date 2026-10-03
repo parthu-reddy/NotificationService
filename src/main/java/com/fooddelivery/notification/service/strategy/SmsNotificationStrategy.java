@@ -8,6 +8,7 @@ import com.fooddelivery.notification.service.TwilioSmsService;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Profile("!dev | prod")
 @lombok.extern.slf4j.Slf4j
 public class SmsNotificationStrategy implements NotificationChannelStrategy {
     @java.lang.SuppressWarnings("all")

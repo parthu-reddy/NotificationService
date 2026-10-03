@@ -16,7 +16,8 @@ public class NotificationAuditLog {
     private UUID id;
     @Column(name = "event_id", unique = true)
     private String eventId;
-    @Column(name = "user_id", nullable = false)
+    // Signup OTPs have an addressed recipient before a user account exists.
+    @Column(name = "user_id")
     private UUID userId;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

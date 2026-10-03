@@ -42,8 +42,12 @@ public class NotificationRouterService {
     }
 
     public void routeAndDispatch(NotificationRequestEvent event) {
-        if (event == null || event.getUserId() == null || event.getEventName() == null || event.getChannel() == null) {
-            throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: userId, eventName, and channel are required.");
+        boolean signupOtp = event != null && event.getUserId() == null
+                && event.getEventName() == com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN
+                && (event.getChannel() == ChannelType.SMS || event.getChannel() == ChannelType.WHATSAPP)
+                && event.getExplicitRecipient() != null && !event.getExplicitRecipient().isBlank();
+        if (event == null || (event.getUserId() == null && !signupOtp) || event.getEventName() == null || event.getChannel() == null) {
+            throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: account identity or addressed signup OTP, eventName, and channel are required.");
         }
         if (event.getChannel() != ChannelType.PUSH && (event.getExplicitRecipient() == null || event.getExplicitRecipient().isBlank())) {
             throw new com.fooddelivery.notification.exception.InvalidPayloadException("Recipient address is missing for channel " + event.getChannel());
@@ -55,10 +59,12 @@ public class NotificationRouterService {
         }
         // Enforce rate limiting
         if (rateLimitingService != null) {
-            rateLimitingService.enforceRateLimit(event.getUserId().toString(), event.getEventName().name());
+            String subject = signupOtp ? signupOtpSubject(event.getExplicitRecipient()) : event.getUserId().toString();
+            rateLimitingService.enforceRateLimit(subject, event.getEventName().name());
         }
         // Check user preferences
-        UserPreference prefs = userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference()); // default to true
+        UserPreference prefs = signupOtp ? new UserPreference()
+                : userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference());
         if (!isChannelEnabled(prefs, event.getChannel())) {
             throw new UserOptedOutException("User opted out of " + event.getChannel() + " channel.");
         }
@@ -82,6 +88,16 @@ public class NotificationRouterService {
         }
         if (providerMessageId != null) {
             createAuditLog(event, template, providerMessageId, DeliveryStatus.QUEUED, null);
+        }
+    }
+
+    private static String signupOtpSubject(String recipient) {
+        try {
+            byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(recipient.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return "signup-otp:" + java.util.HexFormat.of().formatHex(digest);
+        } catch (java.security.NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("Required SHA-256 provider is unavailable", impossible);
         }
     }
 

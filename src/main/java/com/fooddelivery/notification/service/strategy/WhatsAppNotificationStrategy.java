@@ -7,6 +7,7 @@ import com.fooddelivery.notification.service.GupshupWhatsAppService;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Profile("!dev | prod")
 public class WhatsAppNotificationStrategy implements NotificationChannelStrategy {
     private final GupshupWhatsAppService gupshupWhatsAppService;
 

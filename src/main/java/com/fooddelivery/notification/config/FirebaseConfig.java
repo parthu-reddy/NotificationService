@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
+@org.springframework.context.annotation.Profile("!dev | prod")
 @lombok.extern.slf4j.Slf4j
 public class FirebaseConfig {
 
@@ -33,7 +34,7 @@ public class FirebaseConfig {
                 log.info("Firebase application has been initialized");
             }
         } catch (IOException e) {
-            log.error("Failed to initialize Firebase app. Ensure GOOGLE_APPLICATION_CREDENTIALS is set.", e);
+            throw new IllegalStateException("Firebase credentials are required outside Dev; configure GOOGLE_APPLICATION_CREDENTIALS", e);
         }
     }
 }

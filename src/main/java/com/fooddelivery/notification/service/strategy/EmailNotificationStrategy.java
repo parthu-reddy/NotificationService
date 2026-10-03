@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.context.annotation.Profile("!dev | prod")
 @lombok.extern.slf4j.Slf4j
 public class EmailNotificationStrategy implements NotificationChannelStrategy {
     @java.lang.SuppressWarnings("all")
