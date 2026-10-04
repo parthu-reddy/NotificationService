@@ -111,6 +111,12 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Your campaign has under 20% of its budget left. Sign in to top it up before it "
                         + "stops serving.");
 
+        push(copy, NotificationTemplate.APPLICATION_APPROVED,
+                "Your {1} application is approved. Open the app to continue.");
+        push(copy, NotificationTemplate.APPLICATION_REJECTED,
+                "Your {1} application needs changes. Open the app to see the reason and resubmit.");
+        push(copy, NotificationTemplate.APPLICATION_SUSPENDED,
+                "Your {1} account is suspended. Open the app to see the reason and contact support.");
         return copy;
     }
 

@@ -51,7 +51,10 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.NEW_ORDER_DISPATCH, 1),
             Map.entry(NotificationTemplate.OTP_LOGIN, 1),
             Map.entry(NotificationTemplate.AD_CAMPAIGN_PAUSED, 0),
-            Map.entry(NotificationTemplate.BUDGET_RUNNING_LOW, 0));
+            Map.entry(NotificationTemplate.BUDGET_RUNNING_LOW, 0),
+            Map.entry(NotificationTemplate.APPLICATION_APPROVED, 1),
+            Map.entry(NotificationTemplate.APPLICATION_REJECTED, 1),
+            Map.entry(NotificationTemplate.APPLICATION_SUSPENDED, 1));
 
     private static int highestPlaceholder(String content) {
         int highest = 0;
