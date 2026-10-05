@@ -32,6 +32,15 @@ public class NotificationRouterService {
     private final Map<ChannelType, NotificationChannelStrategy> strategyMap;
     private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
 
+    /**
+     * Templates that may be addressed to a phone number with no account: the person signing in for the
+     * first time, and someone invited to an organisation before they have signed up. Everything else
+     * needs an account so preferences and opt-outs apply.
+     */
+    static final java.util.Set<com.fooddelivery.common.constants.NotificationTemplate> PHONE_ADDRESSED_TEMPLATES = java.util.EnumSet.of(
+            com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN,
+            com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION);
+
     public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies, io.micrometer.core.instrument.MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         this.templateRepository = templateRepository;
@@ -42,12 +51,12 @@ public class NotificationRouterService {
     }
 
     public void routeAndDispatch(NotificationRequestEvent event) {
-        boolean signupOtp = event != null && event.getUserId() == null
-                && event.getEventName() == com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN
+        boolean addressedToPhone = event != null && event.getUserId() == null
+                && PHONE_ADDRESSED_TEMPLATES.contains(event.getEventName())
                 && (event.getChannel() == ChannelType.SMS || event.getChannel() == ChannelType.WHATSAPP)
                 && event.getExplicitRecipient() != null && !event.getExplicitRecipient().isBlank();
-        if (event == null || (event.getUserId() == null && !signupOtp) || event.getEventName() == null || event.getChannel() == null) {
-            throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: account identity or addressed signup OTP, eventName, and channel are required.");
+        if (event == null || (event.getUserId() == null && !addressedToPhone) || event.getEventName() == null || event.getChannel() == null) {
+            throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: account identity or a phone-addressed template, eventName, and channel are required.");
         }
         if (event.getChannel() != ChannelType.PUSH && (event.getExplicitRecipient() == null || event.getExplicitRecipient().isBlank())) {
             throw new com.fooddelivery.notification.exception.InvalidPayloadException("Recipient address is missing for channel " + event.getChannel());
@@ -59,11 +68,11 @@ public class NotificationRouterService {
         }
         // Enforce rate limiting
         if (rateLimitingService != null) {
-            String subject = signupOtp ? signupOtpSubject(event.getExplicitRecipient()) : event.getUserId().toString();
+            String subject = addressedToPhone ? phoneSubject(event.getEventName(), event.getExplicitRecipient()) : event.getUserId().toString();
             rateLimitingService.enforceRateLimit(subject, event.getEventName().name());
         }
         // Check user preferences
-        UserPreference prefs = signupOtp ? new UserPreference()
+        UserPreference prefs = addressedToPhone ? new UserPreference()
                 : userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference());
         if (!isChannelEnabled(prefs, event.getChannel())) {
             throw new UserOptedOutException("User opted out of " + event.getChannel() + " channel.");
@@ -91,11 +100,12 @@ public class NotificationRouterService {
         }
     }
 
-    private static String signupOtpSubject(String recipient) {
+    private static String phoneSubject(com.fooddelivery.common.constants.NotificationTemplate template, String recipient) {
         try {
             byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
                     .digest(recipient.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            return "signup-otp:" + java.util.HexFormat.of().formatHex(digest);
+            String prefix = template == com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN ? "signup-otp:" : "phone-" + template.name().toLowerCase(java.util.Locale.ROOT) + ":";
+            return prefix + java.util.HexFormat.of().formatHex(digest);
         } catch (java.security.NoSuchAlgorithmException impossible) {
             throw new IllegalStateException("Required SHA-256 provider is unavailable", impossible);
         }

@@ -103,12 +103,38 @@ public class NotificationRouterServiceTest {
     }
 
     @Test
+    void organisationInvitationReachesAPhoneWithNoAccountUnderItsOwnRateLimitSubject() throws Exception {
+        var event = NotificationRequestEvent.builder()
+                .eventName(com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION)
+                .channel(ChannelType.SMS).explicitRecipient("8999123456").templateParams(java.util.List.of("Manager")).build();
+        var template = new NotificationTemplate();
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("ORGANISATION_INVITATION", ChannelType.SMS))
+                .thenReturn(Optional.of(template));
+        when(smsStrategy.dispatch(event, template)).thenReturn("mock-invitation");
+        notificationRouterService.routeAndDispatch(event);
+        verifyNoInteractions(userPreferenceRepository);
+        var captor = org.mockito.ArgumentCaptor.forClass(com.fooddelivery.notification.domain.NotificationAuditLog.class);
+        verify(auditLogRepository).save(captor.capture());
+        assertNull(captor.getValue().getUserId());
+        assertEquals("8999123456", captor.getValue().getRecipientAddress());
+        var subject = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(rateLimitingService).enforceRateLimit(subject.capture(), eq("ORGANISATION_INVITATION"));
+        // Invitations must not share (and so exhaust) the sign-in OTP budget for the same phone.
+        org.junit.jupiter.api.Assertions.assertTrue(subject.getValue().startsWith("phone-organisation_invitation:"));
+        org.junit.jupiter.api.Assertions.assertFalse(subject.getValue().contains("8999123456"));
+    }
+
+    @Test
     void missingAccountIsNotAllowedForOtherEventsOrPushOtp() {
         for (var event : java.util.List.of(
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID)
                         .channel(ChannelType.SMS).explicitRecipient("8999123456").build(),
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN)
-                        .channel(ChannelType.PUSH).explicitRecipient("8999123456").build())) {
+                        .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
+                NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION)
+                        .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
+                NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.APPLICATION_APPROVED)
+                        .channel(ChannelType.SMS).explicitRecipient("8999123456").build())) {
             assertThrows(InvalidPayloadException.class, () -> notificationRouterService.routeAndDispatch(event));
         }
         verifyNoInteractions(auditLogRepository, templateRepository);

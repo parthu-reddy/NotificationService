@@ -117,6 +117,11 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Your {1} application needs changes. Open the app to see the reason and resubmit.");
         push(copy, NotificationTemplate.APPLICATION_SUSPENDED,
                 "Your {1} account is suspended. Open the app to see the reason and contact support.");
+        // Addressed to a phone number that may have no account. Deliberately no organisation or
+        // inviter name: both are user-entered and must not be relayed by the platform sender.
+        put(copy, NotificationTemplate.ORGANISATION_INVITATION, ChannelType.SMS,
+                "You have been invited to join a business team on La Bouffe as {1}. Sign in with this "
+                        + "number to accept. The invitation expires in 7 days.");
         return copy;
     }
 
