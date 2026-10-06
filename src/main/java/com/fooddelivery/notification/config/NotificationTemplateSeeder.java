@@ -110,6 +110,9 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         email(copy, NotificationTemplate.BUDGET_RUNNING_LOW,
                 "Your campaign has under 20% of its budget left. Sign in to top it up before it "
                         + "stops serving.");
+        email(copy, NotificationTemplate.BUSINESS_WALLET_EMPTY,
+                "Your business wallet has run out of funds, so your ad campaigns are paused. Sign in to "
+                        + "top it up and resume them.");
 
         push(copy, NotificationTemplate.APPLICATION_APPROVED,
                 "Your {1} application is approved. Open the app to continue.");

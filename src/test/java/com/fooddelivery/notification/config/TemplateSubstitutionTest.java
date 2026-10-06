@@ -55,7 +55,9 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.APPLICATION_APPROVED, 1),
             Map.entry(NotificationTemplate.APPLICATION_REJECTED, 1),
             Map.entry(NotificationTemplate.APPLICATION_SUSPENDED, 1),
-            Map.entry(NotificationTemplate.ORGANISATION_INVITATION, 1));
+            Map.entry(NotificationTemplate.ORGANISATION_INVITATION, 1),
+            // WalletService BusinessWalletEmptyNotifier: a payload, no positional parameters (W2).
+            Map.entry(NotificationTemplate.BUSINESS_WALLET_EMPTY, 0));
 
     private static int highestPlaceholder(String content) {
         int highest = 0;
