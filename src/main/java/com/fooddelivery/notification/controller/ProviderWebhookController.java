@@ -32,7 +32,10 @@ public class ProviderWebhookController {
         String status = payload.get("Status"); // Values: sent, delivered, failed, failed-dnd
         String detailedStatus = payload.get("DetailedStatus");
         log.debug("Received Exotel callback for SID: {} with status: {}", smsSid, status);
-        if (token == null || !token.equals(webhookSecret)) {
+        // Constant-time: String.equals returns at the first differing character, which leaks the secret's prefix.
+        if (token == null || !java.security.MessageDigest.isEqual(
+                token.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                webhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
             log.warn("Unauthorized webhook access attempt for SID: {}", smsSid);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
