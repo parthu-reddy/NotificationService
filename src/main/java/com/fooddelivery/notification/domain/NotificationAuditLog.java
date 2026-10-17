@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notification_audit_logs", indexes = {@Index(name = "idx_provider_msg_id", columnList = "provider_message_id")})
+@Table(name = "notification_audit_logs")
 public class NotificationAuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

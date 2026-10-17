@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_devices", indexes = {@Index(name = "idx_user_devices_user_id", columnList = "user_id")})
+@Table(name = "user_devices")
 public class UserDevice {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
