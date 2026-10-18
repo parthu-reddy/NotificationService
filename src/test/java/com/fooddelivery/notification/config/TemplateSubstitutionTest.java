@@ -57,7 +57,9 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.APPLICATION_SUSPENDED, 1),
             Map.entry(NotificationTemplate.ORGANISATION_INVITATION, 1),
             // WalletService BusinessWalletEmptyNotifier: a payload, no positional parameters (W2).
-            Map.entry(NotificationTemplate.BUSINESS_WALLET_EMPTY, 0));
+            Map.entry(NotificationTemplate.BUSINESS_WALLET_EMPTY, 0),
+            // CommunicationIntegration OperatorAlertPublisher: the escaped HTML body (subject in the payload).
+            Map.entry(NotificationTemplate.OPERATOR_ALERT, 1));
 
     private static int highestPlaceholder(String content) {
         int highest = 0;

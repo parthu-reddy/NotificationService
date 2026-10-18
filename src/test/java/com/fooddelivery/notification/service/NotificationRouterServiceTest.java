@@ -69,7 +69,8 @@ public class NotificationRouterServiceTest {
             templateRepository, userPreferenceRepository,
             userDeviceRepository, auditLogRepository,
             java.util.List.of(smsStrategy, emailStrategy),
-            new io.micrometer.core.instrument.simple.SimpleMeterRegistry()
+            new io.micrometer.core.instrument.simple.SimpleMeterRegistry(),
+            mock(com.fooddelivery.notification.service.OperatorAlertSender.class)
         );
         // rateLimitingService moved from constructor injection to @Autowired(required = false)
         // field injection, so it must be set directly here to keep the rate-limit assertion.

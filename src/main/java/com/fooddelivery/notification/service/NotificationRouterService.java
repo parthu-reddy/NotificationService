@@ -31,6 +31,7 @@ public class NotificationRouterService {
     private final NotificationAuditLogRepository auditLogRepository;
     private final Map<ChannelType, NotificationChannelStrategy> strategyMap;
     private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
+    private final OperatorAlertSender operatorAlerts;
 
     /**
      * Templates that may be addressed to a phone number with no account: the person signing in for the
@@ -41,8 +42,9 @@ public class NotificationRouterService {
             com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN,
             com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION);
 
-    public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies, io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+    public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies, io.micrometer.core.instrument.MeterRegistry meterRegistry, OperatorAlertSender operatorAlerts) {
         this.meterRegistry = meterRegistry;
+        this.operatorAlerts = operatorAlerts;
         this.templateRepository = templateRepository;
         this.userPreferenceRepository = userPreferenceRepository;
         this.userDeviceRepository = userDeviceRepository;
@@ -55,7 +57,14 @@ public class NotificationRouterService {
                 && PHONE_ADDRESSED_TEMPLATES.contains(event.getEventName())
                 && (event.getChannel() == ChannelType.SMS || event.getChannel() == ChannelType.WHATSAPP)
                 && event.getExplicitRecipient() != null && !event.getExplicitRecipient().isBlank();
-        if (event == null || (event.getUserId() == null && !addressedToPhone) || event.getEventName() == null || event.getChannel() == null) {
+        // To the platform operator, not a user: no account, no preferences, and only the configured address
+        // (GatewayScrapeAndAlerting_2026-10-18). Sent for real in every profile by OperatorAlertSender.
+        boolean operatorAlert = event != null
+                && event.getEventName() == com.fooddelivery.common.constants.NotificationTemplate.OPERATOR_ALERT;
+        if (operatorAlert) {
+            operatorAlerts.requireAddressedToOperator(event);
+        }
+        if (event == null || (event.getUserId() == null && !addressedToPhone && !operatorAlert) || event.getEventName() == null || event.getChannel() == null) {
             throw new com.fooddelivery.notification.exception.InvalidPayloadException("Invalid event payload: account identity or a phone-addressed template, eventName, and channel are required.");
         }
         if (event.getChannel() != ChannelType.PUSH && (event.getExplicitRecipient() == null || event.getExplicitRecipient().isBlank())) {
@@ -68,11 +77,12 @@ public class NotificationRouterService {
         }
         // Enforce rate limiting
         if (rateLimitingService != null) {
-            String subject = addressedToPhone ? phoneSubject(event.getEventName(), event.getExplicitRecipient()) : event.getUserId().toString();
+            String subject = operatorAlert ? "operator-alert"
+                    : addressedToPhone ? phoneSubject(event.getEventName(), event.getExplicitRecipient()) : event.getUserId().toString();
             rateLimitingService.enforceRateLimit(subject, event.getEventName().name());
         }
         // Check user preferences
-        UserPreference prefs = addressedToPhone ? new UserPreference()
+        UserPreference prefs = addressedToPhone || operatorAlert ? new UserPreference()
                 : userPreferenceRepository.findByUserId(event.getUserId()).orElse(new UserPreference());
         if (!isChannelEnabled(prefs, event.getChannel())) {
             throw new UserOptedOutException("User opted out of " + event.getChannel() + " channel.");
@@ -83,11 +93,15 @@ public class NotificationRouterService {
                 .orElseThrow(() -> missingTemplate(event));
         String providerMessageId = null;
         try {
-            NotificationChannelStrategy strategy = strategyMap.get(event.getChannel());
-            if (strategy == null) {
-                throw new com.fooddelivery.notification.exception.InvalidPayloadException("Channel not supported: " + event.getChannel());
+            if (operatorAlert) {
+                providerMessageId = operatorAlerts.dispatch(event, template);
+            } else {
+                NotificationChannelStrategy strategy = strategyMap.get(event.getChannel());
+                if (strategy == null) {
+                    throw new com.fooddelivery.notification.exception.InvalidPayloadException("Channel not supported: " + event.getChannel());
+                }
+                providerMessageId = strategy.dispatch(event, template);
             }
-            providerMessageId = strategy.dispatch(event, template);
         } catch (com.fooddelivery.notification.exception.TerminalNotificationException e) {
             log.error("Terminal failure for event {}", event.getEventId(), e);
             throw e; // Rethrow as is so Kafka DLT logic catches it and logs it

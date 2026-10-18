@@ -125,6 +125,9 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         put(copy, NotificationTemplate.ORGANISATION_INVITATION, ChannelType.SMS,
                 "You have been invited to join a business team on La Bouffe as {1}. Sign in with this "
                         + "number to accept. The invitation expires in 7 days.");
+        // To the platform operator only. The whole HTML body is the one parameter, escaped by
+        // OperatorAlertFormatter; the subject travels in the event's payload.
+        email(copy, NotificationTemplate.OPERATOR_ALERT, "{1}");
         return copy;
     }
 

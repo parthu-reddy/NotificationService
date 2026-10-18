@@ -23,12 +23,24 @@ public class NotificationEventConsumer {
     private final NotificationRouterService routerService;
     private final NotificationAuditLogRepository auditLogRepository;
     private final com.fooddelivery.common.event.EventBinder eventBinder;
+    private final io.micrometer.core.instrument.MeterRegistry metrics;
 
-    public NotificationEventConsumer(NotificationRouterService routerService, NotificationAuditLogRepository auditLogRepository, com.fooddelivery.common.event.EventBinder eventBinder) {
+    public NotificationEventConsumer(NotificationRouterService routerService, NotificationAuditLogRepository auditLogRepository, com.fooddelivery.common.event.EventBinder eventBinder, io.micrometer.core.instrument.MeterRegistry metrics) {
         this.routerService = routerService;
         this.auditLogRepository = auditLogRepository;
         this.eventBinder = eventBinder;
+        this.metrics = metrics;
+        // One series per template, registered at 0: increase() over a series that first appears at 1 is 0, so a lazy
+        // counter would never fire an alert on the first dead letter (OperatorAlertDeadLettered among them).
+        for (com.fooddelivery.common.constants.NotificationTemplate template : com.fooddelivery.common.constants.NotificationTemplate.values()) {
+            metrics.counter(DEAD_LETTERED, "template", template.name());
+        }
+        metrics.counter(DEAD_LETTERED, "template", UNKNOWN_TEMPLATE);
     }
+
+    /** Every dead-lettered notification, by template; "UNKNOWN" when the payload did not bind. */
+    static final String DEAD_LETTERED = "notifications.dead_lettered";
+    static final String UNKNOWN_TEMPLATE = "UNKNOWN";
 
     // Initial attempt + 3 retries
     // 2s, 4s, 8s backoff
@@ -60,6 +72,7 @@ public class NotificationEventConsumer {
         String replay = com.fooddelivery.common.util.KafkaHeaderUtils.deadLetterPosition(headers);
         if (failedPayload == null) {
             log.error("Received bad payload in DLT. Exception: {} replay={}", exceptionMessage, replay);
+            metrics.counter(DEAD_LETTERED, "template", UNKNOWN_TEMPLATE).increment();
             return;
         }
         
@@ -71,6 +84,8 @@ public class NotificationEventConsumer {
         }
         
         String eventId = failedEvent != null && failedEvent.getEventId() != null ? failedEvent.getEventId() : "UNKNOWN";
+        metrics.counter(DEAD_LETTERED, "template", failedEvent != null && failedEvent.getEventName() != null
+                ? failedEvent.getEventName().name() : UNKNOWN_TEMPLATE).increment();
         log.error("Terminal failure for event {}. Moving to manual intervention queue. Exception: {} replay={}", eventId, exceptionMessage, replay);
         
         NotificationAuditLog auditLog = new NotificationAuditLog();

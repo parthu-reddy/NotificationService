@@ -56,7 +56,7 @@ class MissingTemplateIsTerminalTest {
 
         router = new NotificationRouterService(templateRepository, prefs,
                 mock(UserDeviceRepository.class), mock(NotificationAuditLogRepository.class),
-                List.of(push), meterRegistry);
+                List.of(push), meterRegistry, mock(com.fooddelivery.notification.service.OperatorAlertSender.class));
     }
 
     private NotificationRequestEvent event() {

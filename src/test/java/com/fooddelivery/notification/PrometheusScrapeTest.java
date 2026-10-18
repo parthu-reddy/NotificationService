@@ -23,6 +23,9 @@ import com.fooddelivery.common.test.BaseIntegrationTest;
         "gupshup.source.number=910000000000",
         "platform.webhook.base-url=http://localhost",
         "platform.webhook.secret=dummy-webhook-secret",
+        "platform.operator-alerts.webhook-token=test-operator-alert-token-0123456789abcdef",
+        "platform.operator-alerts.recipient=operator@example.test",
+        "platform.operator-alerts.sender=alerts@example.test",
         "eureka.client.enabled=false",
         "spring.cloud.config.enabled=false",
         "spring.main.web-application-type=servlet"

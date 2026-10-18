@@ -32,7 +32,9 @@ class EndpointAuthorizationCoverageTest {
      * <p>Exotel calls this directly, so it cannot carry a platform principal. CommonSecurityConfig permitAlls /webhooks/providers/** for that reason; it is secured by provider signature, not identity.
      */
     private static final Set<String> INTENTIONALLY_ANONYMOUS = Set.of(
-            "ProviderWebhookController#handleExotelCallback");
+            "ProviderWebhookController#handleExotelCallback",
+            // Alertmanager calls this on the compose network; it is authenticated by its bearer token, not identity.
+            "AlertmanagerWebhookController#receive");
 
     /**
      * A scan finding no controllers would report "nothing unprotected" and pass while guarding

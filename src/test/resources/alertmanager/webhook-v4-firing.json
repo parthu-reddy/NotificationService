@@ -1,0 +1,33 @@
+{
+  "receiver": "notification-system",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "PartnerApplicationReviewOverdue",
+        "instance": "restaurant-service:8094",
+        "job": "services",
+        "service": "restaurant-service",
+        "severity": "warning",
+        "type": "restaurant"
+      },
+      "annotations": {
+        "summary": "Partner applications waiting for review",
+        "description": "The oldest restaurant application has been in review for more than 7 days.",
+        "runbook_url": "https://github.com/parthu-reddy/Deployment/blob/main/runbooks/partner-application-review-overdue.md"
+      },
+      "startsAt": "2026-10-18T04:46:30.123Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus:9090/graph?g0.expr=applications_in_review_oldest_age_seconds",
+      "fingerprint": "6c4f1b7e2a9d3c10"
+    }
+  ],
+  "groupLabels": {"alertname": "PartnerApplicationReviewOverdue", "service": "restaurant-service"},
+  "commonLabels": {"alertname": "PartnerApplicationReviewOverdue", "job": "services", "service": "restaurant-service", "severity": "warning", "type": "restaurant"},
+  "commonAnnotations": {"summary": "Partner applications waiting for review"},
+  "externalURL": "http://alertmanager:9093",
+  "version": "4",
+  "groupKey": "{}:{alertname=\"PartnerApplicationReviewOverdue\", service=\"restaurant-service\"}",
+  "truncatedAlerts": 0
+}

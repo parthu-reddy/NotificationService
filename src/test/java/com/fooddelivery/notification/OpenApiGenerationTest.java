@@ -87,6 +87,14 @@ public class OpenApiGenerationTest {
     @org.springframework.boot.test.mock.mockito.MockBean
     private com.fooddelivery.notification.repository.UserDeviceRepository userDeviceRepository;
 
+    // AlertmanagerWebhookController's collaborators: the scan below reaches only the controller package.
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.fooddelivery.notification.config.OperatorAlertProperties operatorAlertProperties;
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.fooddelivery.notification.service.OperatorAlertFormatter operatorAlertFormatter;
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.fooddelivery.notification.service.OperatorAlertPublisher operatorAlertPublisher;
+
     @org.springframework.context.annotation.Configuration
     // Relabels structured responses from */* to application/json. Without it every
     // generated Zod response validator degrades to z.void(); the scoped scan below

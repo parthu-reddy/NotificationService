@@ -38,6 +38,35 @@
         }
       }
     },
+    "/webhooks/alertmanager" : {
+      "post" : {
+        "tags" : [ "alertmanager-webhook-controller" ],
+        "operationId" : "receive",
+        "parameters" : [ {
+          "name" : "Authorization",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AlertmanagerWebhook"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    },
     "/api/v1/notifications/devices" : {
       "post" : {
         "tags" : [ "device-controller" ],
@@ -95,6 +124,76 @@
   },
   "components" : {
     "schemas" : {
+      "Alert" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "annotations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "startsAt" : {
+            "type" : "string"
+          },
+          "endsAt" : {
+            "type" : "string"
+          },
+          "fingerprint" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AlertmanagerWebhook" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "receiver" : {
+            "type" : "string"
+          },
+          "groupLabels" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "commonLabels" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "commonAnnotations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "externalURL" : {
+            "type" : "string"
+          },
+          "alerts" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Alert"
+            }
+          }
+        }
+      },
       "DeviceRegistrationRequest" : {
         "required" : [ "fcmToken", "platform" ],
         "type" : "object",

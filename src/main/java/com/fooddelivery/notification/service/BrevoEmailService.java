@@ -18,14 +18,16 @@ public class BrevoEmailService {
 
     @Value("${brevo.api.key}")
     private String apiKey;
-    private final HttpClient httpClient = HttpClient.newBuilder().build();
+    // Bounded: a stalled Brevo call would otherwise hold the Kafka consumer thread, and with it every notification
+    // queued behind it (operator alerts included). HttpTimeoutException maps to ProviderGatewayTimeoutException below.
+    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(5)).build();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String sendHtmlEmail(String senderAddress, String recipientAddress, String subject, String htmlBody) throws Exception {
         String endpoint = "https://api.brevo.com/v3/smtp/email";
         Map<String, Object> payloadObj = Map.of("sender", Map.of("email", senderAddress), "to", List.of(Map.of("email", recipientAddress)), "subject", subject, "htmlContent", htmlBody);
         String jsonPayload = objectMapper.writeValueAsString(payloadObj);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endpoint)).header("api-key", apiKey).header("Content-Type", "application/json").header("accept", "application/json").POST(HttpRequest.BodyPublishers.ofString(jsonPayload)).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endpoint)).timeout(java.time.Duration.ofSeconds(10)).header("api-key", apiKey).header("Content-Type", "application/json").header("accept", "application/json").POST(HttpRequest.BodyPublishers.ofString(jsonPayload)).build();
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
