@@ -120,6 +120,63 @@ class TemplateSubstitutionTest {
                 "a body with three placeholders and two parameters leaks {3}");
     }
 
+    /** A value is inserted once and never scanned again, so it cannot pull in another parameter. */
+    @Test
+    void aParameterContainingAPlaceholderIsSentAsWritten() {
+        NotificationChannelStrategy strategy = plainStrategy();
+        assertEquals("Refund {2} for 9.", strategy.hydrateTemplate("Refund {1} for {2}.", List.of("{2}", "9")),
+                "the old sequential replace turned {1}'s value \"{2}\" into the second parameter");
+        assertEquals("Order {0} and {9}.", strategy.hydrateTemplate("Order {0} and {9}.", List.of("x")),
+                "indexes with no parameter stay as written");
+    }
+
+    /** Regex replacement syntax in a value ($1, backslashes) is text, not a back-reference. */
+    @Test
+    void aParameterWithReplacementSyntaxIsInsertedLiterally() {
+        assertEquals("Paid $1 \\ ok.", plainStrategy().hydrateTemplate("Paid {1} ok.", List.of("$1 \\")));
+    }
+
+    @Test
+    void plainTextChannelsDoNotEscape() {
+        assertEquals("Your <b> application", plainStrategy().hydrateTemplate("Your {1} application", List.of("<b>")));
+    }
+
+    /** EMAIL is sent as HTML: a parameter cannot add markup or a link. */
+    @Test
+    void theEmailChannelEscapesEveryParameter() throws Exception {
+        com.fooddelivery.notification.service.BrevoEmailService brevo =
+                org.mockito.Mockito.mock(com.fooddelivery.notification.service.BrevoEmailService.class);
+        var email = new com.fooddelivery.notification.service.strategy.EmailNotificationStrategy(
+                org.mockito.Mockito.mock(com.fooddelivery.notification.service.AwsSesEmailService.class), brevo, "brevo");
+        var template = new com.fooddelivery.notification.domain.NotificationTemplate();
+        template.setContent("Refund {2} for order {1}.");
+        var event = new com.fooddelivery.common.event.NotificationRequestEvent();
+        event.setExplicitRecipient("a@example.com");
+        event.setTemplateParams(List.of("<a href=\"https://evil\">x</a>", "{1}&50"));
+
+        email.dispatch(event, template);
+
+        org.mockito.Mockito.verify(brevo).sendHtmlEmail(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq("a@example.com"), org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(
+                        "Refund {1}&amp;50 for order &lt;a href=&quot;https://evil&quot;&gt;x&lt;/a&gt;."));
+    }
+
+    private static NotificationChannelStrategy plainStrategy() {
+        return new NotificationChannelStrategy() {
+            @Override
+            public ChannelType getSupportedChannel() {
+                return ChannelType.SMS;
+            }
+
+            @Override
+            public String dispatch(com.fooddelivery.common.event.NotificationRequestEvent event,
+                                   com.fooddelivery.notification.domain.NotificationTemplate template) {
+                return null;
+            }
+        };
+    }
+
     @Test
     void theRefundCopyUsesAllThreeOfItsParameters() {
         // REFUND_REQUESTED is the only three-parameter code. Copy that ignores the destination

@@ -11,7 +11,7 @@ import org.springframework.web.util.HtmlUtils;
 /**
  * Turns one Alertmanager notification into the operator's email. Label and annotation values are written by whoever
  * writes alert rules and by the labels of the metrics they query, so every one is HTML-escaped here:
- * {@code hydrateTemplate} inserts the body into the template unescaped.
+ * {@code OperatorAlertSender} inserts the body into the template unescaped (it does not use {@code hydrateTemplate}).
  */
 @Component
 public class OperatorAlertFormatter {

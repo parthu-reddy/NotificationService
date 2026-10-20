@@ -22,16 +22,29 @@ public interface NotificationChannelStrategy {
     String dispatch(NotificationRequestEvent event, NotificationTemplate template) throws Exception;
 
     /**
-     * Replaces placeholders in the template with actual parameters.
+     * Replaces {@code {1}..{n}} with {@code params} for a plain-text channel (SMS, push): values are inserted as given.
      */
     default String hydrateTemplate(String templateContent, java.util.List<String> params) {
+        return hydrateTemplate(templateContent, params, java.util.function.UnaryOperator.identity());
+    }
+
+    /**
+     * Replaces {@code {1}..{n}} with {@code params}, each passed through {@code escape} first (an HTML email escapes
+     * them). One pass over the template: a value is never scanned again, so a parameter that itself contains "{2}"
+     * is sent as written, not replaced by the second parameter. A placeholder with no parameter stays as written.
+     */
+    default String hydrateTemplate(String templateContent, java.util.List<String> params,
+                                   java.util.function.UnaryOperator<String> escape) {
         if (params == null || params.isEmpty()) {
             return templateContent;
         }
-        String hydrated = templateContent;
-        for (int i = 0; i < params.size(); i++) {
-            hydrated = hydrated.replace("{" + (i + 1) + "}", params.get(i));
-        }
-        return hydrated;
+        return PLACEHOLDER.matcher(templateContent).replaceAll(match -> {
+            int index = Integer.parseInt(match.group(1)) - 1;
+            return index >= 0 && index < params.size()
+                    ? java.util.regex.Matcher.quoteReplacement(escape.apply(params.get(index)))
+                    : java.util.regex.Matcher.quoteReplacement(match.group());
+        });
     }
+
+    java.util.regex.Pattern PLACEHOLDER = java.util.regex.Pattern.compile("\\{(\\d+)\\}");
 }

@@ -7,6 +7,7 @@ import com.fooddelivery.notification.service.AwsSesEmailService;
 import com.fooddelivery.notification.service.BrevoEmailService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.HtmlUtils;
 
 @Component
 @org.springframework.context.annotation.Profile("!dev | prod")
@@ -34,7 +35,8 @@ public class EmailNotificationStrategy implements NotificationChannelStrategy {
 
     @Override
     public String dispatch(NotificationRequestEvent event, NotificationTemplate template) throws Exception {
-        String content = hydrateTemplate(template.getContent(), event.getTemplateParams());
+        // Sent as HTML: every parameter is escaped, so a value cannot add markup or links to the email.
+        String content = hydrateTemplate(template.getContent(), event.getTemplateParams(), HtmlUtils::htmlEscape);
         boolean useBrevo = "brevo".equalsIgnoreCase(activeEmailProvider);
         if (consecutiveEmailTimeouts.get() >= 3) {
             // Check if cooldown has passed before probing primary again
