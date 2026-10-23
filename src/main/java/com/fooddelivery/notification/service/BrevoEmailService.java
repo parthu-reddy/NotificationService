@@ -33,9 +33,11 @@ public class BrevoEmailService {
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 JsonNode rootNode = objectMapper.readTree(response.body());
                 return rootNode.path("messageId").asText();
+            } else if (response.statusCode() == 401 || response.statusCode() == 403) {
+                throw new com.fooddelivery.notification.exception.ProviderAuthenticationException("Brevo rejected the credentials (401/403). HTTP " + response.statusCode());
             } else if (response.statusCode() == 400 || response.statusCode() == 404) {
                 throw new com.fooddelivery.notification.exception.RecipientUnreachableException("Brevo Client Error (400/404). HTTP " + response.statusCode());
-            } else if (response.statusCode() >= 400 && response.statusCode() < 500) {
+            } else if (response.statusCode() >= 400 && response.statusCode() < 500 && response.statusCode() != 429) {
                 throw new com.fooddelivery.notification.exception.InvalidPayloadException("Brevo Client Error (4xx). HTTP " + response.statusCode());
             } else if (response.statusCode() == 504 || response.statusCode() == 503 || response.statusCode() == 429) {
                 throw new com.fooddelivery.notification.exception.ProviderGatewayTimeoutException("Brevo Timeout/Rate limit HTTP " + response.statusCode());

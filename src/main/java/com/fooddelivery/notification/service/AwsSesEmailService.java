@@ -43,7 +43,9 @@ public class AwsSesEmailService {
             SendEmailResponse response = sesV2Client.sendEmail(emailRequestBuilder.build());
             return response.messageId();
         } catch (SesV2Exception e) {
-            if (e.statusCode() == 400 || e.statusCode() == 404) {
+            if (e.statusCode() == 401 || e.statusCode() == 403) {
+                throw new com.fooddelivery.notification.exception.ProviderAuthenticationException("AWS SES rejected the credentials (401/403): " + e.awsErrorDetails().errorMessage());
+            } else if (e.statusCode() == 400 || e.statusCode() == 404) {
                 throw new com.fooddelivery.notification.exception.RecipientUnreachableException("AWS SES Client Error (400/404): " + e.awsErrorDetails().errorMessage());
             } else if (e.statusCode() >= 400 && e.statusCode() < 500) {
                 throw new com.fooddelivery.notification.exception.InvalidPayloadException("AWS SES Client Error (4xx): " + e.awsErrorDetails().errorMessage());
