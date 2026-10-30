@@ -126,6 +126,28 @@ public class NotificationRouterServiceTest {
     }
 
     @Test
+    void dineInConsentReachesAGuestPhoneWithNoAccountUnderItsOwnRateLimitSubject() throws Exception {
+        var event = NotificationRequestEvent.builder()
+                .eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_CONSENT)
+                .channel(ChannelType.SMS).explicitRecipient("8999123456").templateParams(java.util.List.of("482913")).build();
+        var template = new NotificationTemplate();
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("DINE_IN_CONSENT", ChannelType.SMS))
+                .thenReturn(Optional.of(template));
+        when(smsStrategy.dispatch(event, template)).thenReturn("mock-dine-in");
+        notificationRouterService.routeAndDispatch(event);
+        verifyNoInteractions(userPreferenceRepository);
+        var captor = org.mockito.ArgumentCaptor.forClass(com.fooddelivery.notification.domain.NotificationAuditLog.class);
+        verify(auditLogRepository).save(captor.capture());
+        assertNull(captor.getValue().getUserId());
+        assertEquals("8999123456", captor.getValue().getRecipientAddress());
+        var subject = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(rateLimitingService).enforceRateLimit(subject.capture(), eq("DINE_IN_CONSENT"));
+        // A waiter's consent requests must not exhaust the guest's own sign-in OTP budget.
+        org.junit.jupiter.api.Assertions.assertTrue(subject.getValue().startsWith("phone-dine_in_consent:"));
+        org.junit.jupiter.api.Assertions.assertFalse(subject.getValue().contains("8999123456"));
+    }
+
+    @Test
     void missingAccountIsNotAllowedForOtherEventsOrPushOtp() {
         for (var event : java.util.List.of(
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.ORDER_PAID)
@@ -133,6 +155,8 @@ public class NotificationRouterServiceTest {
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN)
                         .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION)
+                        .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
+                NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_CONSENT)
                         .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.APPLICATION_APPROVED)
                         .channel(ChannelType.SMS).explicitRecipient("8999123456").build())) {

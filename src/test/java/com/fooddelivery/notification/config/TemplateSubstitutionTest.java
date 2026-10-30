@@ -58,6 +58,8 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.ORGANISATION_INVITATION, 1),
             // WalletService BusinessWalletEmptyNotifier: a payload, no positional parameters (W2).
             Map.entry(NotificationTemplate.BUSINESS_WALLET_EMPTY, 0),
+            // IdentityService OutboxEventPublisherAdapter.publishDineInConsentCode: the code.
+            Map.entry(NotificationTemplate.DINE_IN_CONSENT, 1),
             // CommunicationIntegration OperatorAlertPublisher: the escaped HTML body (subject in the payload).
             Map.entry(NotificationTemplate.OPERATOR_ALERT, 1));
 
