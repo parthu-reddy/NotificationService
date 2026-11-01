@@ -126,12 +126,12 @@ public class NotificationRouterServiceTest {
     }
 
     @Test
-    void dineInConsentReachesAGuestPhoneWithNoAccountUnderItsOwnRateLimitSubject() throws Exception {
+    void dineInSeatedReachesAGuestPhoneWithNoAccountUnderItsOwnRateLimitSubject() throws Exception {
         var event = NotificationRequestEvent.builder()
-                .eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_CONSENT)
-                .channel(ChannelType.SMS).explicitRecipient("8999123456").templateParams(java.util.List.of("482913")).build();
+                .eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_SEATED)
+                .channel(ChannelType.SMS).explicitRecipient("8999123456").templateParams(java.util.List.of()).build();
         var template = new NotificationTemplate();
-        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("DINE_IN_CONSENT", ChannelType.SMS))
+        when(templateRepository.findByEventNameAndChannelAndIsActiveTrue("DINE_IN_SEATED", ChannelType.SMS))
                 .thenReturn(Optional.of(template));
         when(smsStrategy.dispatch(event, template)).thenReturn("mock-dine-in");
         notificationRouterService.routeAndDispatch(event);
@@ -141,9 +141,9 @@ public class NotificationRouterServiceTest {
         assertNull(captor.getValue().getUserId());
         assertEquals("8999123456", captor.getValue().getRecipientAddress());
         var subject = org.mockito.ArgumentCaptor.forClass(String.class);
-        verify(rateLimitingService).enforceRateLimit(subject.capture(), eq("DINE_IN_CONSENT"));
-        // A waiter's consent requests must not exhaust the guest's own sign-in OTP budget.
-        org.junit.jupiter.api.Assertions.assertTrue(subject.getValue().startsWith("phone-dine_in_consent:"));
+        verify(rateLimitingService).enforceRateLimit(subject.capture(), eq("DINE_IN_SEATED"));
+        // A waiter seating guests must not exhaust the guest's own sign-in OTP budget.
+        org.junit.jupiter.api.Assertions.assertTrue(subject.getValue().startsWith("phone-dine_in_seated:"));
         org.junit.jupiter.api.Assertions.assertFalse(subject.getValue().contains("8999123456"));
     }
 
@@ -156,7 +156,7 @@ public class NotificationRouterServiceTest {
                         .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION)
                         .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
-                NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_CONSENT)
+                NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_SEATED)
                         .channel(ChannelType.PUSH).explicitRecipient("8999123456").build(),
                 NotificationRequestEvent.builder().eventName(com.fooddelivery.common.constants.NotificationTemplate.APPLICATION_APPROVED)
                         .channel(ChannelType.SMS).explicitRecipient("8999123456").build())) {

@@ -35,6 +35,8 @@ class TemplateSubstitutionTest {
     /** code -> how many positional parameters its emitters actually pass. */
     private static final Map<NotificationTemplate, Integer> EMITTED_PARAMS = Map.ofEntries(
             Map.entry(NotificationTemplate.ORDER_PAID, 1),
+            // OrderService DineInOrderService / DineInSettlementService: the order id, as ORDER_PAID.
+            Map.entry(NotificationTemplate.DINE_IN_ORDER_CONFIRMED, 1),
             Map.entry(NotificationTemplate.ORDER_READY_FOR_PICKUP, 1),
             Map.entry(NotificationTemplate.DRIVER_ON_THE_WAY, 1),
             Map.entry(NotificationTemplate.DELAY_APPROVAL_REQUESTED, 1),
@@ -58,8 +60,8 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.ORGANISATION_INVITATION, 1),
             // WalletService BusinessWalletEmptyNotifier: a payload, no positional parameters (W2).
             Map.entry(NotificationTemplate.BUSINESS_WALLET_EMPTY, 0),
-            // IdentityService OutboxEventPublisherAdapter.publishDineInConsentCode: the code.
-            Map.entry(NotificationTemplate.DINE_IN_CONSENT, 1),
+            // IdentityService OutboxEventPublisherAdapter.publishDineInSeated: no parameters.
+            Map.entry(NotificationTemplate.DINE_IN_SEATED, 0),
             // CommunicationIntegration OperatorAlertPublisher: the escaped HTML body (subject in the payload).
             Map.entry(NotificationTemplate.OPERATOR_ALERT, 1));
 

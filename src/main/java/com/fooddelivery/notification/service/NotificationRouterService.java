@@ -36,13 +36,13 @@ public class NotificationRouterService {
     /**
      * Templates that may be addressed to a phone number with no account: the person signing in for the
      * first time, someone invited to an organisation before they have signed up, and a dine-in guest
-     * confirming the order a waiter places for their phone. Everything else needs an account so
-     * preferences and opt-outs apply.
+     * a waiter seated by their phone. Everything else needs an account so preferences and opt-outs
+     * apply.
      */
     static final java.util.Set<com.fooddelivery.common.constants.NotificationTemplate> PHONE_ADDRESSED_TEMPLATES = java.util.EnumSet.of(
             com.fooddelivery.common.constants.NotificationTemplate.OTP_LOGIN,
             com.fooddelivery.common.constants.NotificationTemplate.ORGANISATION_INVITATION,
-            com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_CONSENT);
+            com.fooddelivery.common.constants.NotificationTemplate.DINE_IN_SEATED);
 
     public NotificationRouterService(NotificationTemplateRepository templateRepository, UserPreferenceRepository userPreferenceRepository, UserDeviceRepository userDeviceRepository, NotificationAuditLogRepository auditLogRepository, List<NotificationChannelStrategy> strategies, io.micrometer.core.instrument.MeterRegistry meterRegistry, OperatorAlertSender operatorAlerts) {
         this.meterRegistry = meterRegistry;

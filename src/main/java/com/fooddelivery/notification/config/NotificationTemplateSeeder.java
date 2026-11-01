@@ -53,6 +53,8 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         // -- Order lifecycle. One parameter: {1} is the order id. -------------------------------
         push(copy, NotificationTemplate.ORDER_PAID,
                 "Payment received. Order {1} is confirmed and the restaurant is preparing it.");
+        push(copy, NotificationTemplate.DINE_IN_ORDER_CONFIRMED,
+                "Order {1} is confirmed and the kitchen is preparing it. You pay at the restaurant.");
         push(copy, NotificationTemplate.ORDER_READY_FOR_PICKUP,
                 "Order {1} is ready and waiting for a rider to collect it.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
@@ -125,10 +127,11 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         put(copy, NotificationTemplate.ORGANISATION_INVITATION, ChannelType.SMS,
                 "You have been invited to join a business team on La Bouffe as {1}. Sign in with this "
                         + "number to accept. The invitation expires in 7 days.");
-        // Addressed to a phone number that may have no account: a dine-in guest. Only the code -- the
-        // outlet name and table label are user-entered. The guest reads the code to the waiter.
-        put(copy, NotificationTemplate.DINE_IN_CONSENT, ChannelType.SMS,
-                "{1} is your code to confirm your dine-in order. Share it only with the staff at your table.");
+        // Addressed to a phone number that may have no account: a dine-in guest a waiter seated by phone.
+        // No parameters -- the outlet name and table label are user-entered and are never relayed.
+        put(copy, NotificationTemplate.DINE_IN_SEATED, ChannelType.SMS,
+                "A restaurant on La Bouffe has seated you for a dine-in order. Open the app with this number "
+                        + "to see it, and pay in the app or at the restaurant.");
         // To the platform operator only. The whole HTML body is the one parameter, escaped by
         // OperatorAlertFormatter; the subject travels in the event's payload.
         email(copy, NotificationTemplate.OPERATOR_ALERT, "{1}");
