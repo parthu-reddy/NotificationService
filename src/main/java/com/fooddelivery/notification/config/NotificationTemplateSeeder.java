@@ -57,6 +57,12 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Order {1} is confirmed and the kitchen is preparing it. You pay at the restaurant.");
         push(copy, NotificationTemplate.ORDER_READY_FOR_PICKUP,
                 "Order {1} is ready and waiting for a rider to collect it.");
+        push(copy, NotificationTemplate.PICKUP_READY,
+                "Order {1} is ready to collect. Open the app and show your pickup code at the counter.");
+        push(copy, NotificationTemplate.PICKUP_REMINDER,
+                "Order {1} is waiting for you at the counter. Open the app for your pickup code.");
+        push(copy, NotificationTemplate.PICKUP_UNCLAIMED,
+                "Order {1} was not collected in time, so the restaurant has closed it. If something went wrong, contact support from the app.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
                 "A rider is on the way with order {1}.");
         push(copy, NotificationTemplate.DELAY_APPROVAL_REQUESTED,

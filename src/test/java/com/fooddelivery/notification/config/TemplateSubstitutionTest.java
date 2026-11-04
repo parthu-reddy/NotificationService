@@ -38,6 +38,10 @@ class TemplateSubstitutionTest {
             // OrderService DineInOrderService / DineInSettlementService: the order id, as ORDER_PAID.
             Map.entry(NotificationTemplate.DINE_IN_ORDER_CONFIRMED, 1),
             Map.entry(NotificationTemplate.ORDER_READY_FOR_PICKUP, 1),
+            // OrderService OrderActionService.notifyReady / UnclaimedPickupSweeper: the order id.
+            Map.entry(NotificationTemplate.PICKUP_READY, 1),
+            Map.entry(NotificationTemplate.PICKUP_REMINDER, 1),
+            Map.entry(NotificationTemplate.PICKUP_UNCLAIMED, 1),
             Map.entry(NotificationTemplate.DRIVER_ON_THE_WAY, 1),
             Map.entry(NotificationTemplate.DELAY_APPROVAL_REQUESTED, 1),
             Map.entry(NotificationTemplate.ORDER_DELAY_REJECTED, 1),

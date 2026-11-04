@@ -100,7 +100,8 @@ class TemplateCoverageTest {
                 NotificationTemplate.DELAY_APPROVAL_REQUESTED, NotificationTemplate.ORDER_DELAY_REJECTED,
                 NotificationTemplate.ORDER_DELIVERED, NotificationTemplate.ORDER_CANCELLED_BY_RESTAURANT,
                 NotificationTemplate.ORDER_CANCELLED_BY_ADMIN, NotificationTemplate.DISPATCH_FAILED,
-                NotificationTemplate.DELIVERY_FAILED);
+                NotificationTemplate.DELIVERY_FAILED,
+                NotificationTemplate.PICKUP_READY, NotificationTemplate.PICKUP_REMINDER, NotificationTemplate.PICKUP_UNCLAIMED);
 
         for (NotificationTemplate code : lifecycle) {
             assertTrue(NotificationTemplateSeeder.COPY.get(code).containsKey(ChannelType.PUSH),
