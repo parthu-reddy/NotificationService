@@ -42,6 +42,8 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.PICKUP_READY, 1),
             Map.entry(NotificationTemplate.PICKUP_REMINDER, 1),
             Map.entry(NotificationTemplate.PICKUP_UNCLAIMED, 1),
+            // reservation-service BookingService: no parameters (D7).
+            Map.entry(NotificationTemplate.RESERVATION_CONFIRMED, 0),
             Map.entry(NotificationTemplate.DRIVER_ON_THE_WAY, 1),
             Map.entry(NotificationTemplate.DELAY_APPROVAL_REQUESTED, 1),
             Map.entry(NotificationTemplate.ORDER_DELAY_REJECTED, 1),

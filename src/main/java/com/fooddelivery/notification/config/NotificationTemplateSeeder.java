@@ -63,6 +63,13 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Order {1} is waiting for you at the counter. Open the app for your pickup code.");
         push(copy, NotificationTemplate.PICKUP_UNCLAIMED,
                 "Order {1} was not collected in time, so the restaurant has closed it. If something went wrong, contact support from the app.");
+        // -- Table bookings (DiningPickupBooking D47). To the customer's account. SMS bodies take no
+        // parameters: the outlet name, table label, guest name and request are user-entered and are
+        // never relayed by the platform sender (D7).
+        push(copy, NotificationTemplate.RESERVATION_CONFIRMED,
+                "Your table booking is confirmed. Open the app to see the time, your party and your minimum-spend credit.");
+        put(copy, NotificationTemplate.RESERVATION_CONFIRMED, ChannelType.SMS,
+                "Your table booking on La Bouffe is confirmed. Open the app to see the details.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
                 "A rider is on the way with order {1}.");
         push(copy, NotificationTemplate.DELAY_APPROVAL_REQUESTED,
