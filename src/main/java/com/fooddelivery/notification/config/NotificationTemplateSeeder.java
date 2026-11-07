@@ -55,6 +55,8 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Payment received. Order {1} is confirmed and the restaurant is preparing it.");
         push(copy, NotificationTemplate.DINE_IN_ORDER_CONFIRMED,
                 "Order {1} is confirmed and the kitchen is preparing it. You pay at the restaurant.");
+        push(copy, NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED,
+                "Order {1} is confirmed and the kitchen is preparing it. Your booking credit covered it.");
         push(copy, NotificationTemplate.ORDER_READY_FOR_PICKUP,
                 "Order {1} is ready and waiting for a rider to collect it.");
         push(copy, NotificationTemplate.PICKUP_READY,
@@ -70,6 +72,14 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Your table booking is confirmed. Open the app to see the time, your party and your minimum-spend credit.");
         put(copy, NotificationTemplate.RESERVATION_CONFIRMED, ChannelType.SMS,
                 "Your table booking on La Bouffe is confirmed. Open the app to see the details.");
+        push(copy, NotificationTemplate.RESERVATION_MODIFIED,
+                "Your table booking has changed. Open the app to see the new details.");
+        push(copy, NotificationTemplate.RESERVATION_CANCELLED_BY_YOU,
+                "Your table booking is cancelled. Open the app to see any refund due to you.");
+        push(copy, NotificationTemplate.RESERVATION_DEPOSIT_RETURNED,
+                "We received a table booking payment we could not use, so it is being refunded in full. Open the app to see your bookings.");
+        push(copy, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
+                "Thanks for dining with us. {1} of your booking credit was used, and {2} of the minimum spend was not used.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
                 "A rider is on the way with order {1}.");
         push(copy, NotificationTemplate.DELAY_APPROVAL_REQUESTED,

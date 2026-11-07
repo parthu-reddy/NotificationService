@@ -37,6 +37,7 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.ORDER_PAID, 1),
             // OrderService DineInOrderService / DineInSettlementService: the order id, as ORDER_PAID.
             Map.entry(NotificationTemplate.DINE_IN_ORDER_CONFIRMED, 1),
+            Map.entry(NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED, 1),
             Map.entry(NotificationTemplate.ORDER_READY_FOR_PICKUP, 1),
             // OrderService OrderActionService.notifyReady / UnclaimedPickupSweeper: the order id.
             Map.entry(NotificationTemplate.PICKUP_READY, 1),
@@ -44,6 +45,10 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.PICKUP_UNCLAIMED, 1),
             // reservation-service BookingService: no parameters (D7).
             Map.entry(NotificationTemplate.RESERVATION_CONFIRMED, 0),
+            Map.entry(NotificationTemplate.RESERVATION_MODIFIED, 0),
+            Map.entry(NotificationTemplate.RESERVATION_DEPOSIT_RETURNED, 0),
+            Map.entry(NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, 0),
+            Map.entry(NotificationTemplate.RESERVATION_VISIT_SUMMARY, 2),
             Map.entry(NotificationTemplate.DRIVER_ON_THE_WAY, 1),
             Map.entry(NotificationTemplate.DELAY_APPROVAL_REQUESTED, 1),
             Map.entry(NotificationTemplate.ORDER_DELAY_REJECTED, 1),
