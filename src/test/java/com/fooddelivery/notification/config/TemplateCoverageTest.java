@@ -104,7 +104,8 @@ class TemplateCoverageTest {
                 NotificationTemplate.PICKUP_READY, NotificationTemplate.PICKUP_REMINDER, NotificationTemplate.PICKUP_UNCLAIMED,
                 NotificationTemplate.RESERVATION_CONFIRMED, NotificationTemplate.RESERVATION_MODIFIED,
                 NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
-                NotificationTemplate.RESERVATION_DEPOSIT_RETURNED,
+                NotificationTemplate.RESERVATION_DEPOSIT_RETURNED, NotificationTemplate.RESERVATION_REMINDER,
+                NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, NotificationTemplate.RESERVATION_NO_SHOW, NotificationTemplate.RESERVATION_NEEDS_TABLE,
                 NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED);
 
         for (NotificationTemplate code : lifecycle) {
@@ -117,9 +118,11 @@ class TemplateCoverageTest {
     void bookingSmsCarriesNoParameters() {
         // DiningPickupBooking D7: a booking SMS names only the platform. A parameter would let the emitter put the
         // outlet name, table label, guest name or special request -- all user-entered -- into a platform SMS.
-        String sms = NotificationTemplateSeeder.COPY.get(NotificationTemplate.RESERVATION_CONFIRMED).get(ChannelType.SMS);
-        assertNotNull(sms, "RESERVATION_CONFIRMED is sent by SMS (D47) and has no SMS copy");
-        assertFalse(PLACEHOLDER.matcher(sms).find(), "RESERVATION_CONFIRMED SMS takes a parameter: " + sms);
+        for (NotificationTemplate template : java.util.List.of(NotificationTemplate.RESERVATION_CONFIRMED, NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT)) {
+            String sms = NotificationTemplateSeeder.COPY.get(template).get(ChannelType.SMS);
+            assertNotNull(sms, template + " is sent by SMS (D47) and has no SMS copy");
+            assertFalse(PLACEHOLDER.matcher(sms).find(), template + " SMS takes a parameter: " + sms);
+        }
     }
 
     @Test

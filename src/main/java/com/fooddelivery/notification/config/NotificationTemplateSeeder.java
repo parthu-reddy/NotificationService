@@ -78,6 +78,16 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "Your table booking is cancelled. Open the app to see any refund due to you.");
         push(copy, NotificationTemplate.RESERVATION_DEPOSIT_RETURNED,
                 "We received a table booking payment we could not use, so it is being refunded in full. Open the app to see your bookings.");
+        push(copy, NotificationTemplate.RESERVATION_REMINDER,
+                "Your table booking starts soon. Open the app to see the time and the restaurant's location.");
+        push(copy, NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT,
+                "We are sorry -- the restaurant had to cancel your table booking. Any deposit you paid will be refunded in full.");
+        put(copy, NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, ChannelType.SMS,
+                "A restaurant on La Bouffe had to cancel your table booking. Any deposit you paid will be refunded in full. Open the app for details.");
+        push(copy, NotificationTemplate.RESERVATION_NO_SHOW,
+                "You did not arrive for your table booking, so the table was released. Open the app to see what happens to your deposit.");
+        push(copy, NotificationTemplate.RESERVATION_NEEDS_TABLE,
+                "A table booking at your outlet has no table to move to. Open the outlet's bookings to sort it out.");
         push(copy, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
                 "Thanks for dining with us. {1} of your booking credit was used, and {2} of the minimum spend was not used.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
