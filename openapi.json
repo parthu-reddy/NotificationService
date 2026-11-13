@@ -1,50 +1,178 @@
 {
-  "openapi" : "3.0.1",
+  "components" : {
+    "schemas" : {
+      "Alert" : {
+        "properties" : {
+          "annotations" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "endsAt" : {
+            "type" : "string"
+          },
+          "fingerprint" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "startsAt" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AlertmanagerWebhook" : {
+        "properties" : {
+          "alerts" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Alert"
+            },
+            "type" : "array"
+          },
+          "commonAnnotations" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "commonLabels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "externalURL" : {
+            "type" : "string"
+          },
+          "groupLabels" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          },
+          "receiver" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ApiResponseVoid" : {
+        "properties" : {
+          "data" : {
+            "type" : "object"
+          },
+          "errorCode" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "success" : {
+            "type" : "boolean"
+          },
+          "timestamp" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "message", "success", "timestamp" ],
+        "type" : "object"
+      },
+      "DeviceRegistrationRequest" : {
+        "properties" : {
+          "fcmToken" : {
+            "type" : "string"
+          },
+          "platform" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "fcmToken", "platform" ],
+        "type" : "object"
+      }
+    }
+  },
   "info" : {
     "title" : "OpenAPI definition",
     "version" : "v0"
   },
-  "servers" : [ {
-    "url" : "http://localhost",
-    "description" : "Generated server url"
-  } ],
+  "openapi" : "3.0.1",
   "paths" : {
-    "/webhooks/providers/exotel/status" : {
+    "/api/v1/notifications/devices" : {
       "post" : {
-        "tags" : [ "provider-webhook-controller" ],
-        "operationId" : "handleExotelCallback",
-        "parameters" : [ {
-          "name" : "payload",
-          "in" : "query",
-          "required" : true,
-          "schema" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
+        "operationId" : "registerDevice",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeviceRegistrationRequest"
+              }
             }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            },
+            "description" : "OK"
           }
-        }, {
-          "name" : "token",
-          "in" : "query",
-          "required" : false,
+        },
+        "tags" : [ "device-controller" ]
+      }
+    },
+    "/api/v1/notifications/devices/{fcmToken}" : {
+      "delete" : {
+        "operationId" : "unregisterDevice",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fcmToken",
+          "required" : true,
           "schema" : {
             "type" : "string"
           }
         } ],
         "responses" : {
           "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            },
             "description" : "OK"
           }
-        }
+        },
+        "tags" : [ "device-controller" ]
       }
     },
     "/webhooks/alertmanager" : {
       "post" : {
-        "tags" : [ "alertmanager-webhook-controller" ],
         "operationId" : "receive",
         "parameters" : [ {
-          "name" : "Authorization",
           "in" : "header",
+          "name" : "Authorization",
           "required" : false,
           "schema" : {
             "type" : "string"
@@ -64,170 +192,42 @@
           "200" : {
             "description" : "OK"
           }
-        }
-      }
-    },
-    "/api/v1/notifications/devices" : {
-      "post" : {
-        "tags" : [ "device-controller" ],
-        "operationId" : "registerDevice",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/DeviceRegistrationRequest"
-              }
-            }
-          },
-          "required" : true
         },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ApiResponseVoid"
-                }
-              }
-            }
-          }
-        }
+        "tags" : [ "alertmanager-webhook-controller" ]
       }
     },
-    "/api/v1/notifications/devices/{fcmToken}" : {
-      "delete" : {
-        "tags" : [ "device-controller" ],
-        "operationId" : "unregisterDevice",
+    "/webhooks/providers/exotel/status" : {
+      "post" : {
+        "operationId" : "handleExotelCallback",
         "parameters" : [ {
-          "name" : "fcmToken",
-          "in" : "path",
+          "in" : "query",
+          "name" : "payload",
           "required" : true,
+          "schema" : {
+            "additionalProperties" : {
+              "type" : "string"
+            },
+            "type" : "object"
+          }
+        }, {
+          "in" : "query",
+          "name" : "token",
+          "required" : false,
           "schema" : {
             "type" : "string"
           }
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ApiResponseVoid"
-                }
-              }
-            }
+            "description" : "OK"
           }
-        }
+        },
+        "tags" : [ "provider-webhook-controller" ]
       }
     }
   },
-  "components" : {
-    "schemas" : {
-      "Alert" : {
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string"
-          },
-          "labels" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          },
-          "annotations" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          },
-          "startsAt" : {
-            "type" : "string"
-          },
-          "endsAt" : {
-            "type" : "string"
-          },
-          "fingerprint" : {
-            "type" : "string"
-          }
-        }
-      },
-      "AlertmanagerWebhook" : {
-        "type" : "object",
-        "properties" : {
-          "version" : {
-            "type" : "string"
-          },
-          "status" : {
-            "type" : "string"
-          },
-          "receiver" : {
-            "type" : "string"
-          },
-          "groupLabels" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          },
-          "commonLabels" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          },
-          "commonAnnotations" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          },
-          "externalURL" : {
-            "type" : "string"
-          },
-          "alerts" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Alert"
-            }
-          }
-        }
-      },
-      "DeviceRegistrationRequest" : {
-        "required" : [ "fcmToken", "platform" ],
-        "type" : "object",
-        "properties" : {
-          "fcmToken" : {
-            "type" : "string"
-          },
-          "platform" : {
-            "type" : "string"
-          }
-        }
-      },
-      "ApiResponseVoid" : {
-        "required" : [ "message", "success", "timestamp" ],
-        "type" : "object",
-        "properties" : {
-          "success" : {
-            "type" : "boolean"
-          },
-          "message" : {
-            "type" : "string"
-          },
-          "errorCode" : {
-            "type" : "string"
-          },
-          "data" : {
-            "type" : "object"
-          },
-          "timestamp" : {
-            "type" : "string",
-            "format" : "date-time"
-          }
-        }
-      }
-    }
-  }
+  "servers" : [ {
+    "description" : "Generated server url",
+    "url" : "http://localhost"
+  } ]
 }
