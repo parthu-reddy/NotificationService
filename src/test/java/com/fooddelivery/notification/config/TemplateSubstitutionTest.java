@@ -35,9 +35,8 @@ class TemplateSubstitutionTest {
     /** code -> how many positional parameters its emitters actually pass. */
     private static final Map<NotificationTemplate, Integer> EMITTED_PARAMS = Map.ofEntries(
             Map.entry(NotificationTemplate.ORDER_PAID, 1),
-            // OrderService DineInOrderService / DineInSettlementService: the order id, as ORDER_PAID.
+            // OrderService DineInOrderService (every round, TableBill D4): the order id, as ORDER_PAID.
             Map.entry(NotificationTemplate.DINE_IN_ORDER_CONFIRMED, 1),
-            Map.entry(NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED, 1),
             Map.entry(NotificationTemplate.ORDER_READY_FOR_PICKUP, 1),
             // OrderService OrderActionService.notifyReady / UnclaimedPickupSweeper: the order id.
             Map.entry(NotificationTemplate.PICKUP_READY, 1),

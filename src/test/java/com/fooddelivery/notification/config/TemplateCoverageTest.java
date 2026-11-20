@@ -105,8 +105,7 @@ class TemplateCoverageTest {
                 NotificationTemplate.RESERVATION_CONFIRMED, NotificationTemplate.RESERVATION_MODIFIED,
                 NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
                 NotificationTemplate.RESERVATION_DEPOSIT_RETURNED, NotificationTemplate.RESERVATION_REMINDER,
-                NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, NotificationTemplate.RESERVATION_NO_SHOW, NotificationTemplate.RESERVATION_NEEDS_TABLE,
-                NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED);
+                NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, NotificationTemplate.RESERVATION_NO_SHOW, NotificationTemplate.RESERVATION_NEEDS_TABLE);
 
         for (NotificationTemplate code : lifecycle) {
             assertTrue(NotificationTemplateSeeder.COPY.get(code).containsKey(ChannelType.PUSH),

@@ -54,9 +54,7 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         push(copy, NotificationTemplate.ORDER_PAID,
                 "Payment received. Order {1} is confirmed and the restaurant is preparing it.");
         push(copy, NotificationTemplate.DINE_IN_ORDER_CONFIRMED,
-                "Order {1} is confirmed and the kitchen is preparing it. You pay at the restaurant.");
-        push(copy, NotificationTemplate.DINE_IN_ORDER_CREDIT_CONFIRMED,
-                "Order {1} is confirmed and the kitchen is preparing it. Your booking credit covered it.");
+                "Order {1} is confirmed and the kitchen is preparing it. It goes on your table's bill, paid at the end.");
         push(copy, NotificationTemplate.ORDER_READY_FOR_PICKUP,
                 "Order {1} is ready and waiting for a rider to collect it.");
         push(copy, NotificationTemplate.PICKUP_READY,
