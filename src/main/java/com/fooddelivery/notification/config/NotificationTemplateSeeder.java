@@ -130,6 +130,12 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
         email(copy, NotificationTemplate.REFUND_FAILED,
                 "We could not process the refund of {2} for order {1}. Our support team is looking "
                         + "into it and will contact you.");
+        // Table bills (NamedLimits NL-D8): one parameter, {1} is the amount; never the outlet name or table label.
+        push(copy, NotificationTemplate.TABLE_BILL_REFUNDED,
+                "Your refund of {1} from your table bill has been processed.");
+        // To the outlet's managers (NamedLimits NL-D9). No parameters.
+        push(copy, NotificationTemplate.DINING_SEND_BACK_REQUESTED,
+                "A waiter has asked you to send a dish back. Open the kitchen to approve it.");
 
         // -- Not the order lifecycle. These carry a payload, not positional parameters. ----------
         push(copy, NotificationTemplate.NEW_ORDER_DISPATCH,

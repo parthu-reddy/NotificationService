@@ -64,6 +64,8 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.PAYMENT_REFUNDED, 2),
             Map.entry(NotificationTemplate.PAYMENT_PARTIALLY_REFUNDED, 2),
             Map.entry(NotificationTemplate.REFUND_FAILED, 2),
+            Map.entry(NotificationTemplate.TABLE_BILL_REFUNDED, 1),
+            Map.entry(NotificationTemplate.DINING_SEND_BACK_REQUESTED, 0),
             Map.entry(NotificationTemplate.NEW_ORDER_DISPATCH, 1),
             Map.entry(NotificationTemplate.OTP_LOGIN, 1),
             Map.entry(NotificationTemplate.AD_CAMPAIGN_PAUSED, 0),
