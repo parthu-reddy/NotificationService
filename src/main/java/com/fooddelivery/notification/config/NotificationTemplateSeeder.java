@@ -88,6 +88,9 @@ public class NotificationTemplateSeeder implements CommandLineRunner {
                 "A table booking at your outlet has no table to move to. Open the outlet's bookings to sort it out.");
         push(copy, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
                 "Thanks for dining with us. {1} of your booking credit was used, and {2} of the minimum spend was not used.");
+        push(copy, NotificationTemplate.RESERVATION_VISIT_REFUND,
+                "Thanks for dining with us. {1} of your booking credit was used. {2} of your deposit could not be checked when you paid, "
+                        + "so it is being refunded to you. {3} of the minimum spend was not used.");
         push(copy, NotificationTemplate.DRIVER_ON_THE_WAY,
                 "A rider is on the way with order {1}.");
         push(copy, NotificationTemplate.DELAY_APPROVAL_REQUESTED,

@@ -48,6 +48,7 @@ class TemplateSubstitutionTest {
             Map.entry(NotificationTemplate.RESERVATION_DEPOSIT_RETURNED, 0),
             Map.entry(NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, 0),
             Map.entry(NotificationTemplate.RESERVATION_VISIT_SUMMARY, 2),
+            Map.entry(NotificationTemplate.RESERVATION_VISIT_REFUND, 3),
             Map.entry(NotificationTemplate.RESERVATION_REMINDER, 0),
             Map.entry(NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, 0),
             Map.entry(NotificationTemplate.RESERVATION_NO_SHOW, 0),

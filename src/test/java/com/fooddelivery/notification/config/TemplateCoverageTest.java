@@ -103,7 +103,7 @@ class TemplateCoverageTest {
                 NotificationTemplate.DELIVERY_FAILED,
                 NotificationTemplate.PICKUP_READY, NotificationTemplate.PICKUP_REMINDER, NotificationTemplate.PICKUP_UNCLAIMED,
                 NotificationTemplate.RESERVATION_CONFIRMED, NotificationTemplate.RESERVATION_MODIFIED,
-                NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, NotificationTemplate.RESERVATION_VISIT_SUMMARY,
+                NotificationTemplate.RESERVATION_CANCELLED_BY_YOU, NotificationTemplate.RESERVATION_VISIT_SUMMARY, NotificationTemplate.RESERVATION_VISIT_REFUND,
                 NotificationTemplate.RESERVATION_DEPOSIT_RETURNED, NotificationTemplate.RESERVATION_REMINDER,
                 NotificationTemplate.RESERVATION_CANCELLED_BY_RESTAURANT, NotificationTemplate.RESERVATION_NO_SHOW, NotificationTemplate.RESERVATION_NEEDS_TABLE);
 
